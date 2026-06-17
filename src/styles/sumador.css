@@ -1,0 +1,514 @@
+/********** SUMADOR **********/
+
+.sumador-valvic-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.sumador-valvic-header {
+    margin-bottom: 24px;
+}
+
+.sumador-valvic-title {
+    color: #FFD700;
+    font-size: 28px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 8px 0;
+}
+
+.title-icon {
+    font-size: 32px;
+}
+
+.sumador-valvic-subtitle {
+    color: #666;
+    font-size: 16px;
+    margin: 0;
+}
+
+/********** TOOLBAR **********/
+.sumador-valvic-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    background: #0a0a0a;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 215, 0, 0.06);
+    margin-bottom: 20px;
+}
+
+.sumador-valvic-toolbar-left,
+.sumador-valvic-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/********** SELECTOR **********/
+.sumador-valvic-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #000;
+    padding: 4px 16px 4px 12px;
+    border-radius: 8px;
+    border: 1.5px solid #1a1a1a;
+    transition: all 0.3s ease;
+}
+
+.sumador-valvic-selector:focus-within {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.06);
+}
+
+.selector-icon {
+    color: #FFD700;
+    font-size: 18px;
+}
+
+.sumador-valvic-select {
+    padding: 10px 32px 10px 8px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23FFD700' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    min-width: 180px;
+}
+
+.sumador-valvic-select:focus {
+    outline: none;
+}
+
+.sumador-valvic-select option {
+    background: #0a0a0a;
+    color: #fff;
+}
+
+/********** INPUT PORCENTAJE **********/
+.sumador-valvic-porcentaje {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #000;
+    padding: 4px 12px 4px 12px;
+    border-radius: 8px;
+    border: 1.5px solid #1a1a1a;
+    transition: all 0.3s ease;
+}
+
+.sumador-valvic-porcentaje:focus-within {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.06);
+}
+
+.porcentaje-icon {
+    color: #555;
+    font-size: 16px;
+}
+
+.sumador-valvic-input {
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    width: 70px;
+    outline: none;
+}
+
+.sumador-valvic-input:focus {
+    outline: none;
+}
+
+.sumador-valvic-input::-webkit-outer-spin-button,
+.sumador-valvic-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.porcentaje-label {
+    color: #888;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/********** BOTONES **********/
+.sumador-valvic-btn-primary {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #FFD700, #e6c200);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sumador-valvic-btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+}
+
+.sumador-valvic-btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.sumador-valvic-btn-success {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sumador-valvic-btn-success:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+.sumador-valvic-btn-success:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.sumador-valvic-btn-secondary {
+    padding: 10px 20px;
+    background: transparent;
+    color: #888;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sumador-valvic-btn-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    border-color: #444;
+}
+
+.sumador-valvic-btn-secondary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/********** MENSAJES **********/
+.sumador-valvic-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.sumador-valvic-message.success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.sumador-valvic-message.error {
+    background: rgba(244, 67, 54, 0.1);
+    color: #ff6b6b;
+    border: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+.sumador-valvic-message.warning {
+    background: rgba(255, 215, 0, 0.1);
+    color: #FFD700;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.sumador-valvic-message.info {
+    background: rgba(33, 150, 243, 0.1);
+    color: #64B5F6;
+    border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+/********** TABLA **********/
+.sumador-valvic-table-container {
+    background: #0a0a0a;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 215, 0, 0.06);
+    overflow: hidden;
+}
+
+.sumador-valvic-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    background: #000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.table-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #888;
+    font-size: 14px;
+}
+
+.info-icon {
+    color: #FFD700;
+}
+
+.badge-count {
+    background: rgba(255, 215, 0, 0.1);
+    color: #FFD700;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.porcentaje-aplicado {
+    background: rgba(255, 215, 0, 0.15);
+    color: #FFD700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.sumador-valvic-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sumador-valvic-table thead {
+    background: #000;
+}
+
+.sumador-valvic-table th {
+    padding: 12px 16px;
+    text-align: left;
+    color: #888;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sumador-valvic-table td {
+    padding: 12px 16px;
+    color: #ddd;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.sumador-valvic-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.sumador-valvic-row-modificado {
+    background: rgba(255, 215, 0, 0.03) !important;
+}
+
+.sumador-valvic-row-modificado td {
+    color: #fff !important;
+}
+
+.sumador-valvic-table code {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #aaa;
+}
+
+.precio-actual {
+    color: #888;
+}
+
+.precio-nuevo {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
+.aumento {
+    font-size: 13px;
+}
+
+.aumento-positivo {
+    color: #4CAF50;
+}
+
+.aumento-negativo {
+    color: #ff6b6b;
+}
+
+/********** PRECIO NUEVO EDITABLE **********/
+.precios-editables {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 20px;
+    color: #4CAF50;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.edit-icon {
+    font-size: 12px;
+}
+
+.sumador-valvic-precio-input {
+    padding: 4px 8px;
+    background: #1a1a1a;
+    border: 1.5px solid #2a2a2a;
+    border-radius: 4px;
+    color: #4CAF50;
+    font-size: 14px;
+    font-weight: 600;
+    width: 120px;
+    transition: all 0.3s ease;
+}
+
+.sumador-valvic-precio-input:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    outline: none;
+    background: #0a0a0a;
+}
+
+.sumador-valvic-precio-input:hover {
+    border-color: #4CAF50;
+}
+
+/* Animación para el precio nuevo */
+@keyframes precioDestello {
+    0% { background-color: rgba(76, 175, 80, 0.1); }
+    100% { background-color: transparent; }
+}
+
+.sumador-valvic-row-modificado .sumador-valvic-precio-input {
+    animation: precioDestello 1s ease;
+}
+
+/********** ESTADOS VACÍOS **********/
+.sumador-valvic-empty,
+.sumador-valvic-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #555;
+    text-align: center;
+}
+
+.sumador-valvic-empty .empty-icon {
+    font-size: 48px;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.sumador-valvic-empty p {
+    margin: 0;
+}
+
+/********** RESPONSIVE **********/
+@media (max-width: 768px) {
+    .sumador-valvic-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sumador-valvic-toolbar-left,
+    .sumador-valvic-toolbar-right {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .sumador-valvic-selector {
+        flex: 1;
+    }
+
+    .sumador-valvic-select {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .sumador-valvic-porcentaje {
+        flex: 1;
+    }
+
+    .sumador-valvic-input {
+        width: 100%;
+    }
+
+    .sumador-valvic-table-container {
+        overflow-x: auto;
+    }
+
+    .sumador-valvic-table {
+        font-size: 13px;
+        min-width: 600px;
+    }
+
+    .sumador-valvic-table th,
+    .sumador-valvic-table td {
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sumador-valvic-title {
+        font-size: 22px;
+    }
+
+    .sumador-valvic-toolbar {
+        padding: 12px;
+    }
+
+    .sumador-valvic-btn-primary,
+    .sumador-valvic-btn-success,
+    .sumador-valvic-btn-secondary {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+
+    .sumador-valvic-table {
+        font-size: 12px;
+        min-width: 500px;
+    }
+
+    .sumador-valvic-table th,
+    .sumador-valvic-table td {
+        padding: 6px 10px;
+    }
+}

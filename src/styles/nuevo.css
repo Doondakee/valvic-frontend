@@ -1,0 +1,330 @@
+/********** NUEVO **********/
+
+.nuevo-valvic-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.nuevo-valvic-header {
+    margin-bottom: 30px;
+}
+
+.nuevo-valvic-title {
+    color: #FFD700;
+    font-size: 28px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 8px 0;
+}
+
+.title-icon {
+    font-size: 32px;
+}
+
+.nuevo-valvic-subtitle {
+    color: #666;
+    font-size: 16px;
+    margin: 0;
+}
+
+/********** GRID DE TARJETAS **********/
+.nuevo-valvic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+}
+
+.nuevo-valvic-card {
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 215, 0, 0.06);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.nuevo-valvic-card:hover {
+    border-color: rgba(255, 215, 0, 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.nuevo-valvic-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px;
+    background: #000;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.06);
+}
+
+.nuevo-valvic-card-header h3 {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-icon {
+    color: #FFD700;
+    font-size: 24px;
+}
+
+.nuevo-valvic-card-body {
+    padding: 24px;
+}
+
+/********** LISTA DE CATEGORÍAS **********/
+.categorias-list {
+    margin-bottom: 20px;
+    min-height: 150px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.categoria-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.categoria-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    color: #ddd;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: all 0.2s ease;
+    border-radius: 4px;
+}
+
+.categoria-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.item-icon {
+    color: #FFD700;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+/********** INFO DE PRODUCTOS **********/
+.productos-info {
+    background: #000;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 215, 0, 0.06);
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+.info-item:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.info-label {
+    color: #666;
+    font-size: 14px;
+}
+
+.info-value {
+    color: #FFD700;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/********** BOTONES **********/
+.nuevo-valvic-btn-primary {
+    width: 100%;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #FFD700, #e6c200);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.nuevo-valvic-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+}
+
+.nuevo-valvic-btn-success {
+    width: 100%;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.nuevo-valvic-btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+/********** FORMULARIOS DEL MODAL **********/
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ddd;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.form-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #FFD700;
+}
+
+.label-icon {
+    color: #FFD700;
+    font-size: 16px;
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 10px 12px;
+    background: #000;
+    border: 1.5px solid #1a1a1a;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-select:focus {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.06);
+    outline: none;
+}
+
+.form-input::placeholder {
+    color: #444;
+}
+
+.form-select option {
+    background: #0a0a0a;
+    color: #fff;
+}
+
+.form-help-text {
+    display: block;
+    color: #ff6b6b;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/********** ESTADOS VACÍOS **********/
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    color: #555;
+    text-align: center;
+}
+
+.empty-state .empty-icon {
+    font-size: 48px;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/********** LOADING **********/
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 30px 20px;
+    color: #666;
+}
+
+/********** RESPONSIVE **********/
+@media (max-width: 768px) {
+    .nuevo-valvic-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .nuevo-valvic-title {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nuevo-valvic-container {
+        padding: 12px;
+    }
+
+    .nuevo-valvic-card-header {
+        padding: 16px;
+    }
+
+    .nuevo-valvic-card-body {
+        padding: 16px;
+    }
+
+    .categorias-list {
+        max-height: 200px;
+    }
+
+    .nuevo-valvic-title {
+        font-size: 20px;
+    }
+
+    .nuevo-valvic-subtitle {
+        font-size: 14px;
+    }
+}

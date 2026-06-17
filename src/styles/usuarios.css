@@ -1,0 +1,635 @@
+/********** USUARIOS **********/
+
+.usuarios-valvic-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/********** HEADER **********/
+.usuarios-valvic-header {
+    margin-bottom: 24px;
+}
+
+.usuarios-valvic-title {
+    color: #FFD700;
+    font-size: 28px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 8px 0;
+}
+
+.title-icon {
+    font-size: 32px;
+}
+
+.usuarios-valvic-subtitle {
+    color: #666;
+    font-size: 16px;
+    margin: 0;
+}
+
+/********** MENSAJES **********/
+.usuarios-valvic-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.usuarios-valvic-message.success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.usuarios-valvic-message.error {
+    background: rgba(244, 67, 54, 0.1);
+    color: #ff6b6b;
+    border: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+.usuarios-valvic-message.info {
+    background: rgba(33, 150, 243, 0.1);
+    color: #64B5F6;
+    border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+/********** BARRA DE ACCIONES **********/
+.usuarios-valvic-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.usuarios-valvic-btn-primary {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #FFD700, #e6c200);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.usuarios-valvic-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+}
+
+.usuarios-valvic-btn-pendientes {
+    padding: 10px 20px;
+    background: rgba(255, 215, 0, 0.1);
+    color: #FFD700;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.usuarios-valvic-btn-pendientes:hover {
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.badge-pendientes {
+    background: #FFD700;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.badge-pendientes-grande {
+    background: #FFD700;
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-left: 8px;
+}
+
+.usuarios-valvic-btn-refresh {
+    padding: 10px 20px;
+    background: transparent;
+    color: #888;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.usuarios-valvic-btn-refresh:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    border-color: #444;
+}
+
+.usuarios-valvic-btn-refresh:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.rotando {
+    animation: girar 1s linear infinite;
+}
+
+@keyframes girar {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/********** FORMULARIO **********/
+.usuarios-valvic-form {
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 215, 0, 0.06);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.form-title {
+    color: #FFD700;
+    font-size: 18px;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.usuarios-valvic-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.form-input,
+.form-select {
+    padding: 10px 12px;
+    background: #000;
+    border: 1.5px solid #1a1a1a;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.06);
+    outline: none;
+}
+
+.form-input::placeholder {
+    color: #444;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.btn-submit {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+.btn-submit:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-cancel {
+    padding: 10px 24px;
+    background: transparent;
+    color: #888;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+}
+
+/********** TABLAS **********/
+.usuarios-valvic-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.usuarios-valvic-table thead {
+    background: #000;
+}
+
+.usuarios-valvic-table th {
+    padding: 12px 16px;
+    text-align: left;
+    color: #888;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.usuarios-valvic-table td {
+    padding: 12px 16px;
+    color: #ddd;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.usuarios-valvic-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/********** USUARIOS PENDIENTES **********/
+.usuarios-valvic-pendientes {
+    background: #0a0a0a;
+    border: 2px solid rgba(255, 215, 0, 0.15);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.pendientes-header {
+    margin-bottom: 16px;
+}
+
+.pendientes-header h3 {
+    color: #FFD700;
+    font-size: 18px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.row-pendiente {
+    background: rgba(255, 215, 0, 0.03);
+}
+
+.badge-pendiente {
+    display: inline-block;
+    font-size: 10px;
+    background: #FFD700;
+    color: #000;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    margin-left: 8px;
+    text-transform: uppercase;
+}
+
+/********** USUARIOS ACTIVOS **********/
+.usuarios-valvic-activos {
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 215, 0, 0.06);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.activos-header {
+    margin-bottom: 16px;
+}
+
+.activos-header h3 {
+    color: #fff;
+    font-size: 18px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-icon {
+    color: #FFD700;
+}
+
+.badge-count {
+    background: rgba(255, 215, 0, 0.1);
+    color: #FFD700;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/********** USER INFO **********/
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-icon {
+    color: #888;
+    font-size: 16px;
+}
+
+.id-cell {
+    color: #666;
+    font-size: 13px;
+}
+
+/********** BADGES DE ROL **********/
+.role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.role-badge.empleado {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4CAF50;
+}
+
+.role-badge.admin {
+    background: rgba(255, 215, 0, 0.15);
+    color: #FFD700;
+}
+
+.rol-select {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #2a2a2a;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.rol-select:focus {
+    border-color: #FFD700;
+    outline: none;
+}
+
+/********** ESTADO BADGE **********/
+.estado-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.estado-badge.activo {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4CAF50;
+}
+
+.estado-badge.inactivo {
+    background: rgba(244, 67, 54, 0.15);
+    color: #ff6b6b;
+}
+
+/********** BOTONES DE ACCIÓN **********/
+.acciones-botones {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-activar {
+    padding: 4px 12px;
+    background: rgba(76, 175, 80, 0.15);
+    color: #4CAF50;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-activar:hover {
+    background: rgba(76, 175, 80, 0.25);
+}
+
+.btn-desactivar {
+    padding: 4px 12px;
+    background: rgba(255, 215, 0, 0.15);
+    color: #FFD700;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-desactivar:hover {
+    background: rgba(255, 215, 0, 0.25);
+}
+
+.btn-eliminar {
+    padding: 4px 12px;
+    background: rgba(244, 67, 54, 0.15);
+    color: #ff6b6b;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-eliminar:hover {
+    background: rgba(244, 67, 54, 0.25);
+}
+
+.admin-protected {
+    color: #888;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+}
+
+/********** ESTADOS VACÍOS **********/
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #555;
+    text-align: center;
+}
+
+.empty-state .empty-icon {
+    font-size: 48px;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.empty-hint {
+    color: #444;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.empty-row {
+    text-align: center;
+    padding: 30px !important;
+    color: #555 !important;
+}
+
+/********** FECHA SOLICITUD **********/
+.fecha-solicitud {
+    color: #666;
+    font-size: 13px;
+}
+
+/********** RESPONSIVE **********/
+@media (max-width: 1024px) {
+    .usuarios-valvic-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .usuarios-valvic-actions {
+        flex-direction: column;
+    }
+
+    .usuarios-valvic-btn-primary,
+    .usuarios-valvic-btn-pendientes,
+    .usuarios-valvic-btn-refresh {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .usuarios-valvic-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .usuarios-valvic-table {
+        font-size: 13px;
+        min-width: 600px;
+    }
+
+    .usuarios-valvic-table th,
+    .usuarios-valvic-table td {
+        padding: 8px 10px;
+    }
+
+    .acciones-botones {
+        flex-direction: column;
+    }
+
+    .btn-activar,
+    .btn-desactivar,
+    .btn-eliminar {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .usuarios-valvic-container {
+        padding: 12px;
+    }
+
+    .usuarios-valvic-pendientes,
+    .usuarios-valvic-activos {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .usuarios-valvic-title {
+        font-size: 22px;
+    }
+
+    .usuarios-valvic-table {
+        font-size: 12px;
+        min-width: 500px;
+    }
+
+    .usuarios-valvic-table th,
+    .usuarios-valvic-table td {
+        padding: 6px 8px;
+    }
+}
