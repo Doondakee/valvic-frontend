@@ -52,13 +52,6 @@
     box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.06);
 }
 
-.inventario-valvic-categoria-label {
-    font-size: 13px;
-    color: #666;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
 .inventario-valvic-categoria-select {
     padding: 10px 36px 10px 8px;
     background: transparent;
@@ -219,7 +212,6 @@
     border-color: #444;
 }
 
-/********** BOTONES DE ACCIÓN ESPECIALES **********/
 .inventario-valvic-btn-success {
     padding: 10px 24px;
     background: linear-gradient(135deg, #4CAF50, #45a049);
@@ -272,18 +264,44 @@
     cursor: not-allowed;
 }
 
-/********** ALERTAS **********/
-.inventario-valvic-alert {
-    background: rgba(255, 215, 0, 0.06);
-    border: 1px solid rgba(255, 215, 0, 0.15);
-    border-radius: 12px;
-    padding: 14px 20px;
-    color: #FFD700;
+/********** ALERTAS - DOS AVISOS EN UNA LÍNEA **********/
+.inventario-valvic-alerts-container {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
     margin-bottom: 20px;
+}
+
+.inventario-valvic-alert {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 18px;
+    border-radius: 12px;
     font-size: 14px;
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.inventario-valvic-alert-danger {
+    background: rgba(255, 0, 0, 0.08);
+    border: 1px solid rgba(255, 0, 0, 0.15);
+    color: #ff6b6b;
+}
+
+.inventario-valvic-alert-warning {
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    color: #FFD700;
+}
+
+.inventario-valvic-alert-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.inventario-valvic-alert strong {
+    font-weight: 700;
 }
 
 /********** FORMULARIO **********/
@@ -430,14 +448,6 @@
     color: #aaa;
 }
 
-.inventario-valvic-row-stock-bajo {
-    background: rgba(255, 0, 0, 0.03);
-}
-
-.inventario-valvic-row-stock-bajo td {
-    color: #ff6b6b;
-}
-
 /********** CHECKBOX EN TABLA **********/
 .inventario-valvic-table input[type="checkbox"] {
     width: 16px;
@@ -452,38 +462,6 @@
 .inventario-valvic-table input[type="checkbox"]:checked {
     background-color: #FFD700;
     border-color: #FFD700;
-}
-
-/********** STOCK CON BOTÓN DESCONTAR **********/
-.stock-display-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.stock-btn-mini {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    background: rgba(189, 188, 188, 0.1);
-    border: 1px solid rgba(241, 60, 60, 0.2);
-    border-radius: 4px;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.stock-btn-mini:hover {
-    background: rgba(252, 114, 114, 0.2);
-    transform: scale(1.1);
-}
-
-.stock-btn-mini:active {
-    transform: scale(0.9);
 }
 
 /********** SELECT EN MODO EDICIÓN **********/
@@ -538,7 +516,7 @@
     max-width: 150px;
 }
 
-/********** BADGES **********/
+/********** BADGES DE STOCK **********/
 .inventario-valvic-badge {
     display: inline-block;
     padding: 4px 12px;
@@ -552,9 +530,181 @@
     color: #4CAF50;
 }
 
+.badge-warning {
+    background: rgba(255, 215, 0, 0.2);
+    color: #FFD700;
+    border: 1px solid rgba(255, 215, 0, 0.25);
+}
+
 .badge-danger {
     background: rgba(255, 0, 0, 0.15);
     color: #ff6b6b;
+}
+
+/********** FILAS CON STOCK CRÍTICO **********/
+.inventario-valvic-row-stock-cero {
+    background: rgba(255, 0, 0, 0.05);
+}
+
+.inventario-valvic-row-stock-cero td {
+    color: #ff6b6b;
+}
+
+.inventario-valvic-row-stock-bajo {
+    background: rgba(255, 215, 0, 0.04);
+}
+
+.inventario-valvic-row-stock-bajo td {
+    color: #FFD700;
+}
+
+/********** STOCK CON BOTÓN DESCONTAR **********/
+.stock-display-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stock-btn-mini {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: #888;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.stock-btn-mini:hover {
+    background: rgba(255, 215, 0, 0.15);
+    color: #FFD700;
+    border-color: rgba(255, 215, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.stock-btn-mini:active {
+    transform: scale(0.9);
+}
+
+/********** EDITOR DE STOCK CON BOTONES **********/
+.stock-editor-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1.5px solid #2a2a2a;
+    border-radius: 6px;
+    background: #1a1a1a;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    max-width: 120px;
+}
+
+.stock-editor-wrapper:focus-within {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+}
+
+.stock-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.stock-btn:hover {
+    background: rgba(255, 215, 0, 0.1);
+    color: #FFD700;
+}
+
+.stock-btn:active {
+    transform: scale(0.9);
+}
+
+.stock-btn-minus {
+    border-right: 1px solid #2a2a2a;
+}
+
+.stock-btn-plus {
+    border-left: 1px solid #2a2a2a;
+}
+
+.stock-input {
+    width: 60px;
+    min-width: 40px;
+    padding: 4px 0;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.stock-input::-webkit-outer-spin-button,
+.stock-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.stock-input:focus {
+    outline: none;
+}
+
+/********** PRECIO EN MODO EDICIÓN **********/
+.precio-input {
+    max-width: 120px;
+    padding: 4px 8px;
+    background: #1a1a1a;
+    border: 1.5px solid #2a2a2a;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+    transition: all 0.3s ease;
+}
+
+.precio-input:focus {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+    outline: none;
+}
+
+/********** COLUMNAS OCULTAS - INDICADORES **********/
+.columnas-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-left: 12px;
+}
+
+.columna-oculta {
+    font-size: 11px;
+    color: #888;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 2px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /********** EMPTY STATE **********/
@@ -621,33 +771,85 @@
     flex-shrink: 0;
 }
 
-.inventario-valvic-search-icon {
-    color: #555;
-    font-size: 18px;
-}
-
-/* Iconos en los encabezados de tabla */
 .th-icon {
     font-size: 14px;
     margin-right: 4px;
     color: #FFD700;
 }
 
-/* Iconos en alertas */
-.inventario-valvic-alert-icon {
-    font-size: 20px;
-    color: #FFD700;
-}
-
-/* Iconos en el formulario */
 .form-icon {
     font-size: 20px;
     color: #FFD700;
 }
 
-/* Iconos en botones */
 .btn-icon {
     font-size: 16px;
+}
+
+/********** MENSAJES TEMPORALES **********/
+.inventario-valvic-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    animation: slideDown 0.3s ease;
+}
+
+.inventario-valvic-message.success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.inventario-valvic-message.error {
+    background: rgba(244, 67, 54, 0.1);
+    color: #ff6b6b;
+    border: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+.inventario-valvic-message.info {
+    background: rgba(33, 150, 243, 0.1);
+    color: #64B5F6;
+    border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/********** SCROLLBAR PERSONALIZADA **********/
+.inventario-valvic-table-container::-webkit-scrollbar,
+.modal-products-list::-webkit-scrollbar,
+.modal-content-valvic::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.inventario-valvic-table-container::-webkit-scrollbar-track,
+.modal-products-list::-webkit-scrollbar-track,
+.modal-content-valvic::-webkit-scrollbar-track {
+    background: #0a0a0a;
+    border-radius: 4px;
+}
+
+.inventario-valvic-table-container::-webkit-scrollbar-thumb,
+.modal-products-list::-webkit-scrollbar-thumb,
+.modal-content-valvic::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 4px;
+}
+
+.inventario-valvic-table-container::-webkit-scrollbar-thumb:hover,
+.modal-products-list::-webkit-scrollbar-thumb:hover,
+.modal-content-valvic::-webkit-scrollbar-thumb:hover {
+    background: #3a3a3a;
 }
 
 /********** MODAL DE CONFIRMACIÓN **********/
@@ -668,12 +870,8 @@
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .modal-content-valvic {
@@ -863,196 +1061,6 @@
     box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
 }
 
-/********** COLUMNAS OCULTAS - INDICADORES **********/
-.columnas-info {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-left: 12px;
-}
-
-.columna-oculta {
-    font-size: 11px;
-    color: #888;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 2px 10px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/********** SCROLLBAR PERSONALIZADA **********/
-.inventario-valvic-table-container::-webkit-scrollbar,
-.modal-products-list::-webkit-scrollbar,
-.modal-content-valvic::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.inventario-valvic-table-container::-webkit-scrollbar-track,
-.modal-products-list::-webkit-scrollbar-track,
-.modal-content-valvic::-webkit-scrollbar-track {
-    background: #0a0a0a;
-    border-radius: 4px;
-}
-
-.inventario-valvic-table-container::-webkit-scrollbar-thumb,
-.modal-products-list::-webkit-scrollbar-thumb,
-.modal-content-valvic::-webkit-scrollbar-thumb {
-    background: #2a2a2a;
-    border-radius: 4px;
-}
-
-.inventario-valvic-table-container::-webkit-scrollbar-thumb:hover,
-.modal-products-list::-webkit-scrollbar-thumb:hover,
-.modal-content-valvic::-webkit-scrollbar-thumb:hover {
-    background: #3a3a3a;
-}
-
-/********** EDITOR DE STOCK CON BOTONES **********/
-.stock-editor-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    border: 1.5px solid #2a2a2a;
-    border-radius: 6px;
-    background: #1a1a1a;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    max-width: 120px
-}
-
-.stock-editor-wrapper:focus-within {
-    border-color: #FFD700;
-    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
-}
-
-.stock-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 32px;
-    background: transparent;
-    border: none;
-    color: #888;
-    font-size: 18px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-    padding: 0;
-}
-
-.stock-btn:hover {
-    background: rgba(255, 215, 0, 0.1);
-    color: #FFD700;
-}
-
-.stock-btn:active {
-    transform: scale(0.9);
-}
-
-.stock-btn-minus {
-    border-right: 1px solid #2a2a2a;
-}
-
-.stock-btn-plus {
-    border-left: 1px solid #2a2a2a;
-}
-
-.stock-input {
-    width: 60px;
-    min-width: 40px;
-    padding: 4px 0;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    text-align: center;
-    outline: none;
-    -moz-appearance: textfield;
-    appearance: textfield;
-}
-
-.stock-input::-webkit-outer-spin-button,
-.stock-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.stock-input:focus {
-    outline: none;
-}
-
-/* Estilo para el precio en modo edición */
-.precio-input {
-    max-width: 120px;
-    padding: 4px 8px;
-    background: #1a1a1a;
-    border: 1.5px solid #2a2a2a;
-    border-radius: 6px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    text-align: right;
-    transition: all 0.3s ease;
-}
-
-.precio-input:focus {
-    border-color: #FFD700;
-    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
-    outline: none;
-}
-
-/********** MENSAJES TEMPORALES **********/
-.inventario-valvic-message,
-.nuevo-valvic-message,
-.sumador-valvic-message {
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    animation: slideDown 0.3s ease;
-}
-
-.inventario-valvic-message.success,
-.nuevo-valvic-message.success,
-.sumador-valvic-message.success {
-    background: rgba(76, 175, 80, 0.1);
-    color: #4CAF50;
-    border: 1px solid rgba(76, 175, 80, 0.2);
-}
-
-.inventario-valvic-message.error,
-.nuevo-valvic-message.error,
-.sumador-valvic-message.error {
-    background: rgba(244, 67, 54, 0.1);
-    color: #ff6b6b;
-    border: 1px solid rgba(244, 67, 54, 0.2);
-}
-
-.inventario-valvic-message.info,
-.nuevo-valvic-message.info,
-.sumador-valvic-message.info {
-    background: rgba(33, 150, 243, 0.1);
-    color: #64B5F6;
-    border: 1px solid rgba(33, 150, 243, 0.2);
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-
 /********** RESPONSIVE **********/
 
 @media (max-width: 1024px) {
@@ -1096,6 +1104,10 @@
     .actions-bar-right {
         justify-content: center;
         width: 100%;
+    }
+
+    .inventario-valvic-alerts-container {
+        flex-direction: column;
     }
 }
 

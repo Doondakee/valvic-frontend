@@ -429,6 +429,22 @@ function Inventario() {
         return count;
     };
 
+    // Función para obtener la clase del badge según el stock
+    const getStockBadgeClass = (stock) => {
+        const stockValue = stock || 0;
+        if (stockValue === 0) return 'badge-danger';
+        if (stockValue <= 3) return 'badge-warning';
+        return 'badge-success';
+    };
+
+    // Función para obtener la clase de la fila según el stock
+    const getRowClass = (stock) => {
+        const stockValue = stock || 0;
+        if (stockValue === 0) return 'inventario-valvic-row-stock-cero';
+        if (stockValue <= 3) return 'inventario-valvic-row-stock-bajo';
+        return '';
+    };
+
     return (
         <div className="inventario-valvic-container">
             <div className="inventario-valvic-toolbar">
@@ -841,7 +857,10 @@ function Inventario() {
                                         const datosProducto = modoEdicion ? productosEditados[producto.id] : producto;
                                         
                                         return (
-                                            <tr key={producto.id} className={(producto.stock || 0) <= 0 ? 'inventario-valvic-row-stock-bajo' : ''}>
+                                            <tr 
+                                                key={producto.id} 
+                                                className={`${!modoEdicion ? getRowClass(producto.stock) : ''} ${(producto.stock || 0) <= 0 && !modoEdicion ? 'inventario-valvic-row-stock-cero' : ''}`}
+                                            >
                                                 {modoEliminar && esAdmin && (
                                                     <td>
                                                         <input 
@@ -1044,7 +1063,7 @@ function Inventario() {
                                                         </div>
                                                     ) : (
                                                         <div className="stock-display-wrapper">
-                                                            <span className={`inventario-valvic-badge ${(producto.stock || 0) <= 0 ? 'badge-danger' : 'badge-success'}`}>
+                                                            <span className={`inventario-valvic-badge ${getStockBadgeClass(producto.stock)}`}>
                                                                 {producto.stock || 0}
                                                             </span>
                                                             {(producto.stock || 0) > 0 && (
