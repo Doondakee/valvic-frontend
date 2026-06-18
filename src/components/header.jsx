@@ -37,21 +37,25 @@ function Header({ activeTab, setActiveTab, onLogout, onNavigateToUsuarios }) {
                         <span className="tab-text">Inventario</span>
                     </button>
                     
-                    <button
-                        className={`header-valvic-tab ${activeTab === 'nuevo' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('nuevo')}
-                    >
-                        <FaPlus className="tab-icon" />
-                        <span className="tab-text">Nuevo</span>
-                    </button>
+                    {esAdmin && (
+                        <>
+                            <button
+                                className={`header-valvic-tab ${activeTab === 'nuevo' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('nuevo')}
+                            >
+                                <FaPlus className="tab-icon" />
+                                <span className="tab-text">+ Nuevo</span>
+                            </button>
 
-                    <button
-                        className={`header-valvic-tab ${activeTab === 'sumador' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('sumador')}
-                    >
-                        <FaPercent className="tab-icon" />
-                        <span className="tab-text">Sumador</span>
-                    </button>
+                            <button
+                                className={`header-valvic-tab ${activeTab === 'sumador' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('sumador')}
+                            >
+                                <FaPercent className="tab-icon" />
+                                <span className="tab-text">Sumador %</span>
+                            </button>
+                        </>
+                    )}
                 </nav>
 
                 <div className="header-valvic-user">

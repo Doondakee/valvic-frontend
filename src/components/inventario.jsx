@@ -33,6 +33,9 @@ function Inventario() {
     const [productosEditados, setProductosEditados] = useState({});
     const [productosSeleccionados, setProductosSeleccionados] = useState([]);
     const [modalConfirmacionOpen, setModalConfirmacionOpen] = useState(false);
+    
+    // Estado para mensaje temporal
+    const [mensajeTemporal, setMensajeTemporal] = useState(null);
 
     // Estado para columnas visibles
     const [columnasVisibles, setColumnasVisibles] = useState({
@@ -63,12 +66,10 @@ function Inventario() {
     const rol = localStorage.getItem('rol');
     const esAdmin = rol === 'administrador';
 
-    // Función para verificar si un valor está vacío (NULL o string vacío)
     const estaVacio = (valor) => {
         return valor === null || valor === undefined || valor === '';
     };
 
-    // Determinar qué columnas mostrar
     const determinarColumnasVisibles = (productosData, esTodas) => {
         if (!productosData || productosData.length === 0) {
             return {
@@ -100,15 +101,68 @@ function Inventario() {
 
         return {
             mostrarCodigo: productosData.some(p => !estaVacio(p.codigo)),
-            mostrarCategoria: true, // Siempre visible
-            mostrarProducto: true, // Siempre visible
+            mostrarCategoria: true,
+            mostrarProducto: true,
             mostrarVehiculo: productosData.some(p => !estaVacio(p.vehiculo)),
             mostrarDetalle: productosData.some(p => !estaVacio(p.detalle)),
             mostrarContenido: productosData.some(p => !estaVacio(p.contenido)),
             mostrarPrecioContado: productosData.some(p => !estaVacio(p.precio_contado) && p.precio_contado > 0),
-            mostrarPrecio: true, // Siempre visible
+            mostrarPrecio: true,
             mostrarPrecioColocado: productosData.some(p => !estaVacio(p.precio_colocado) && p.precio_colocado > 0)
         };
+    };
+
+    // Función para descontar stock directamente (sin confirmación)
+    const descontarStockDirecto = async (producto) => {
+        if (producto.stock <= 0) {
+            setMensajeTemporal({ tipo: 'error', texto: '⚠️ No hay stock disponible' });
+            setTimeout(() => setMensajeTemporal(null), 3000);
+            return;
+        }
+
+        try {
+            setCargando(true);
+            const nuevoStock = producto.stock - 1;
+            
+            await axios.patch(`${API_URL}/productos/${producto.id}/stock`, {
+                cantidad: -1
+            });
+
+            setProductos(prev => 
+                prev.map(p => 
+                    p.id === producto.id ? { ...p, stock: nuevoStock } : p
+                )
+            );
+            setProductosFiltrados(prev => 
+                prev.map(p => 
+                    p.id === producto.id ? { ...p, stock: nuevoStock } : p
+                )
+            );
+
+            if (modoEdicion && productosEditados[producto.id]) {
+                setProductosEditados(prev => ({
+                    ...prev,
+                    [producto.id]: {
+                        ...prev[producto.id],
+                        stock: nuevoStock
+                    }
+                }));
+            }
+
+            // Solo mensaje temporal sin confirmación
+            setMensajeTemporal({ 
+                tipo: 'success', 
+                texto: `📦 Descontado 1 a "${producto.producto}"` 
+            });
+            setTimeout(() => setMensajeTemporal(null), 2500);
+
+        } catch (error) {
+            console.error('Error al descontar stock:', error);
+            setMensajeTemporal({ tipo: 'error', texto: '❌ Error al descontar stock' });
+            setTimeout(() => setMensajeTemporal(null), 3000);
+        } finally {
+            setCargando(false);
+        }
     };
 
     const cargarCategorias = async () => {
@@ -136,7 +190,6 @@ function Inventario() {
             setProductos(productosData);
             setProductosFiltrados(productosData);
             
-            // Determinar columnas visibles
             const columnas = determinarColumnasVisibles(productosData, esTodas);
             setColumnasVisibles(columnas);
             
@@ -167,19 +220,29 @@ function Inventario() {
         cargarCategorias();
     }, []);
 
-    // Filtrar productos por búsqueda
     useEffect(() => {
         if (!categoriaSeleccionada || !productos.length) return;
         
         let filtrados = [...productos];
         
         if (busqueda) {
+            const terminoBusqueda = busqueda.toLowerCase().trim();
+            
+            const contienePalabraExacta = (texto, termino) => {
+                if (!texto) return false;
+                const textoLower = texto.toLowerCase();
+                return textoLower === termino || 
+                       textoLower.startsWith(termino + ' ') || 
+                       textoLower.endsWith(' ' + termino) || 
+                       textoLower.includes(' ' + termino + ' ');
+            };
+
             filtrados = filtrados.filter(p => 
-                (p.producto && p.producto.toLowerCase().includes(busqueda.toLowerCase())) ||
-                (p.codigo && p.codigo.toLowerCase().includes(busqueda.toLowerCase())) ||
-                (p.contenido && p.contenido.toLowerCase().includes(busqueda.toLowerCase())) ||
-                (p.vehiculo && p.vehiculo.toLowerCase().includes(busqueda.toLowerCase())) ||
-                (p.detalle && p.detalle.toLowerCase().includes(busqueda.toLowerCase()))
+                contienePalabraExacta(p.producto, terminoBusqueda) ||
+                contienePalabraExacta(p.codigo, terminoBusqueda) ||
+                contienePalabraExacta(p.contenido, terminoBusqueda) ||
+                contienePalabraExacta(p.vehiculo, terminoBusqueda) ||
+                contienePalabraExacta(p.detalle, terminoBusqueda)
             );
         }
         setProductosFiltrados(filtrados);
@@ -210,13 +273,15 @@ function Inventario() {
         
             await cargarCategorias();
             await cargarProductosPorCategoria(categoriaSeleccionada);
+            setMensajeTemporal({ tipo: 'success', texto: '✅ Producto guardado exitosamente' });
+            setTimeout(() => setMensajeTemporal(null), 3000);
         } catch (error) {
             console.error('Error al guardar:', error);
-            alert('Error al guardar producto');
+            setMensajeTemporal({ tipo: 'error', texto: '❌ Error al guardar producto' });
+            setTimeout(() => setMensajeTemporal(null), 3000);
         }
     };
 
-    // Función para activar modo edición
     const activarModoEdicion = () => {
         setModoEliminar(false);
         setProductosSeleccionados([]);
@@ -228,13 +293,11 @@ function Inventario() {
         setProductosEditados(editados);
     };
 
-    // Función para cancelar modo edición
     const cancelarModoEdicion = () => {
         setModoEdicion(false);
         setProductosEditados({});
     };
 
-    // Función para guardar cambios en modo edición
     const guardarCambiosEdicion = async () => {
         try {
             setCargando(true);
@@ -248,16 +311,17 @@ function Inventario() {
             await cargarProductosPorCategoria(categoriaSeleccionada);
             setModoEdicion(false);
             setProductosEditados({});
-            alert('Cambios guardados exitosamente');
+            setMensajeTemporal({ tipo: 'success', texto: '✅ Cambios guardados exitosamente' });
+            setTimeout(() => setMensajeTemporal(null), 3000);
         } catch (error) {
             console.error('Error al guardar cambios:', error);
-            alert('Error al guardar los cambios');
+            setMensajeTemporal({ tipo: 'error', texto: '❌ Error al guardar los cambios' });
+            setTimeout(() => setMensajeTemporal(null), 3000);
         } finally {
             setCargando(false);
         }
     };
 
-    // Cambios en edición - Validación para números
     const handleEditChange = (id, campo, valor) => {
         setProductosEditados(prev => ({
             ...prev,
@@ -268,10 +332,10 @@ function Inventario() {
         }));
     };
 
-    // Activar modo eliminar - SOLO PARA ADMINISTRADORES
     const activarModoEliminar = () => {
         if (!esAdmin) {
-            alert('No tienes permisos para eliminar productos');
+            setMensajeTemporal({ tipo: 'error', texto: '⛔ No tienes permisos para eliminar productos' });
+            setTimeout(() => setMensajeTemporal(null), 3000);
             return;
         }
         setModoEdicion(false);
@@ -280,13 +344,11 @@ function Inventario() {
         setProductosSeleccionados([]);
     };
 
-    // Cancelar modo eliminar
     const cancelarModoEliminar = () => {
         setModoEliminar(false);
         setProductosSeleccionados([]);
     };
 
-    // Seleccionar/deseleccionar producto en modo eliminar
     const toggleSeleccionProducto = (id) => {
         setProductosSeleccionados(prev => 
             prev.includes(id) 
@@ -295,7 +357,6 @@ function Inventario() {
         );
     };
 
-    // Seleccionar todos los productos en modo eliminar
     const seleccionarTodos = () => {
         if (productosSeleccionados.length === productosFiltrados.length) {
             setProductosSeleccionados([]);
@@ -304,16 +365,15 @@ function Inventario() {
         }
     };
 
-    // Modal de confirmación de eliminación
     const abrirModalConfirmacion = () => {
         if (productosSeleccionados.length === 0) {
-            alert('No has seleccionado ningún producto para eliminar');
+            setMensajeTemporal({ tipo: 'error', texto: '⚠️ No has seleccionado ningún producto' });
+            setTimeout(() => setMensajeTemporal(null), 3000);
             return;
         }
         setModalConfirmacionOpen(true);
     };
 
-    // Eliminar productos seleccionados
     const eliminarProductosSeleccionados = async () => {
         try {
             setCargando(true);
@@ -324,10 +384,12 @@ function Inventario() {
             setProductosSeleccionados([]);
             setModoEliminar(false);
             setModalConfirmacionOpen(false);
-            alert('Productos eliminados exitosamente');
+            setMensajeTemporal({ tipo: 'success', texto: `🗑️ ${productosSeleccionados.length} productos eliminados` });
+            setTimeout(() => setMensajeTemporal(null), 3000);
         } catch (error) {
             console.error('Error al eliminar productos:', error);
-            alert('Error al eliminar productos');
+            setMensajeTemporal({ tipo: 'error', texto: '❌ Error al eliminar productos' });
+            setTimeout(() => setMensajeTemporal(null), 3000);
         } finally {
             setCargando(false);
         }
@@ -352,7 +414,6 @@ function Inventario() {
         return info;
     };
 
-    // Obtener el número de columnas para el colspan
     const getTotalColumnas = () => {
         let count = 0;
         if (columnasVisibles.mostrarCodigo) count++;
@@ -379,16 +440,10 @@ function Inventario() {
                             value={categoriaSeleccionada}
                             onChange={handleCategoriaChange}
                         >
-                            <option value="">
-                                ─ Seleccionar ─
-                            </option>
-                            <option value="todas">
-                                📦 Todas las categorías
-                            </option>
+                            <option value="">─ Seleccionar ─</option>
+                            <option value="todas">📦 Todas las categorías</option>
                             {categorias.map(cat => (
-                                <option key={cat} value={cat}>
-                                    {cat}
-                                </option>
+                                <option key={cat} value={cat}>{cat}</option>
                             ))}
                         </select>
                     </div>
@@ -397,13 +452,23 @@ function Inventario() {
                 <div className="inventario-valvic-toolbar-right">
                     <div className="inventario-valvic-search">
                         <FaSearch className="inventario-valvic-search-icon" />
-                        <input type="text" placeholder="Buscar productos..."
-                            className="inventario-valvic-search-input" value={busqueda}
-                            onChange={(e) => setBusqueda(e.target.value)} disabled={!categoriaSeleccionada}
+                        <input 
+                            type="text" 
+                            placeholder="Buscar productos..."
+                            className="inventario-valvic-search-input" 
+                            value={busqueda}
+                            onChange={(e) => setBusqueda(e.target.value)} 
+                            disabled={!categoriaSeleccionada}
                         />
                     </div>
                 </div>
             </div>
+
+            {mensajeTemporal && (
+                <div className={`inventario-valvic-message ${mensajeTemporal.tipo}`}>
+                    {mensajeTemporal.texto}
+                </div>
+            )}
 
             {productosStockBajo.length > 0 && (
                 <div className="inventario-valvic-alert">
@@ -429,10 +494,14 @@ function Inventario() {
                         <div className="inventario-valvic-form-grid">
                             <div className="form-input-wrapper">
                                 <MdCategory className="input-icon" />
-                                <input type="text" placeholder="Categoría *" className="inventario-valvic-form-input"
-                                    value={nuevoProducto.categoria || ''} onChange={(e) => 
-                                    setNuevoProducto({...nuevoProducto, categoria: e.target.value})}
-                                    required list="categoriasList"
+                                <input 
+                                    type="text" 
+                                    placeholder="Categoría *" 
+                                    className="inventario-valvic-form-input"
+                                    value={nuevoProducto.categoria || ''} 
+                                    onChange={(e) => setNuevoProducto({...nuevoProducto, categoria: e.target.value})}
+                                    required 
+                                    list="categoriasList"
                                 />
                                 <datalist id="categoriasList">
                                     {categorias.map(cat => <option key={cat} value={cat} />)}
@@ -441,16 +510,21 @@ function Inventario() {
                     
                             <div className="form-input-wrapper">
                                 <FaTags className="input-icon" />
-                                <input type="text" placeholder="Producto *" className="inventario-valvic-form-input"
+                                <input 
+                                    type="text" 
+                                    placeholder="Producto" 
+                                    className="inventario-valvic-form-input"
                                     value={nuevoProducto.producto || ''}
                                     onChange={(e) => setNuevoProducto({...nuevoProducto, producto: e.target.value})}
-                                    required
                                 />
                             </div>
 
                             <div className="form-input-wrapper">
                                 <FaCar className="input-icon" />
-                                <input type="text" placeholder="Vehículo" className="inventario-valvic-form-input"
+                                <input 
+                                    type="text" 
+                                    placeholder="Vehículo" 
+                                    className="inventario-valvic-form-input"
                                     value={nuevoProducto.vehiculo || ''}
                                     onChange={(e) => setNuevoProducto({...nuevoProducto, vehiculo: e.target.value})}
                                 />
@@ -458,7 +532,10 @@ function Inventario() {
 
                             <div className="form-input-wrapper">
                                 <FaInfoCircle className="input-icon" />
-                                <input type="text" placeholder="Detalle" className="inventario-valvic-form-input"
+                                <input 
+                                    type="text" 
+                                    placeholder="Detalle" 
+                                    className="inventario-valvic-form-input"
                                     value={nuevoProducto.detalle || ''}
                                     onChange={(e) => setNuevoProducto({...nuevoProducto, detalle: e.target.value})}
                                 />
@@ -466,8 +543,11 @@ function Inventario() {
                     
                             <div className="form-input-wrapper">
                                 <FiPackage className="input-icon" />
-                                <input type="text" placeholder="Contenido (ej: 205/55R16)"
-                                    className="inventario-valvic-form-input" value={nuevoProducto.contenido || ''}
+                                <input 
+                                    type="text" 
+                                    placeholder="Contenido (ej: 205/55R16)"
+                                    className="inventario-valvic-form-input" 
+                                    value={nuevoProducto.contenido || ''}
                                     onChange={(e) => setNuevoProducto({...nuevoProducto, contenido: e.target.value})}
                                 />
                             </div>
@@ -550,7 +630,10 @@ function Inventario() {
                             
                             <div className="form-input-wrapper">
                                 <FaBarcode className="input-icon" />
-                                <input type="text" placeholder="Código" className="inventario-valvic-form-input"
+                                <input 
+                                    type="text" 
+                                    placeholder="Código" 
+                                    className="inventario-valvic-form-input"
                                     value={nuevoProducto.codigo || ''}
                                     onChange={(e) => setNuevoProducto({...nuevoProducto, codigo: e.target.value})}
                                 />
@@ -563,8 +646,7 @@ function Inventario() {
                             <button type="button" className="inventario-valvic-btn-secondary" onClick={() => {
                                 setMostrarFormulario(false);
                                 setEditando(null);
-                            }}
-                            >
+                            }}>
                                 <FaTimes className="btn-icon" /> Cancelar
                             </button>
                         </div>
@@ -588,12 +670,14 @@ function Inventario() {
                         <div className="actions-bar-left">
                             {!modoEdicion && !modoEliminar ? (
                                 <>
-                                    <button 
-                                        className="inventario-valvic-btn-primary"
-                                        onClick={activarModoEdicion}
-                                    >
-                                        <FaEdit className="btn-icon" /> Editar Productos
-                                    </button>
+                                    {esAdmin && (
+                                        <button 
+                                            className="inventario-valvic-btn-primary"
+                                            onClick={activarModoEdicion}
+                                        >
+                                            <FaEdit className="btn-icon" /> Editar Productos
+                                        </button>
+                                    )}
                                     {esAdmin && (
                                         <button 
                                             className="inventario-valvic-btn-danger"
@@ -602,7 +686,6 @@ function Inventario() {
                                             <FaTrashAlt className="btn-icon" /> Eliminar Productos
                                         </button>
                                     )}
-                                    {/* Indicador de columnas ocultas */}
                                     {categoriaSeleccionada && categoriaSeleccionada !== 'todas' && (
                                         <div className="columnas-info">
                                             {!columnasVisibles.mostrarCodigo && (
@@ -639,23 +722,25 @@ function Inventario() {
                                     )}
                                 </>
                             ) : modoEdicion ? (
-                                <>
-                                    <button 
-                                        className="inventario-valvic-btn-success"
-                                        onClick={guardarCambiosEdicion}
-                                    >
-                                        <FaSave className="btn-icon" /> Guardar Cambios
-                                    </button>
-                                    <button 
-                                        className="inventario-valvic-btn-secondary"
-                                        onClick={cancelarModoEdicion}
-                                    >
-                                        <FaTimes className="btn-icon" /> Cancelar Edición
-                                    </button>
-                                    <span className="actions-info">
-                                        Editando {Object.keys(productosEditados).length} productos
-                                    </span>
-                                </>
+                                esAdmin && (
+                                    <>
+                                        <button 
+                                            className="inventario-valvic-btn-success"
+                                            onClick={guardarCambiosEdicion}
+                                        >
+                                            <FaSave className="btn-icon" /> Guardar Cambios
+                                        </button>
+                                        <button 
+                                            className="inventario-valvic-btn-secondary"
+                                            onClick={cancelarModoEdicion}
+                                        >
+                                            <FaTimes className="btn-icon" /> Cancelar Edición
+                                        </button>
+                                        <span className="actions-info">
+                                            Editando {Object.keys(productosEditados).length} productos
+                                        </span>
+                                    </>
+                                )
                             ) : (
                                 esAdmin && (
                                     <>
@@ -783,12 +868,15 @@ function Inventario() {
                                                 {columnasVisibles.mostrarCategoria && (
                                                     <td>
                                                         {modoEdicion ? (
-                                                            <input 
-                                                                type="text"
-                                                                className="inventario-valvic-edit-input"
+                                                            <select
+                                                                className="inventario-valvic-edit-select"
                                                                 value={datosProducto.categoria || ''}
                                                                 onChange={(e) => handleEditChange(producto.id, 'categoria', e.target.value)}
-                                                            />
+                                                            >
+                                                                {categorias.map(cat => (
+                                                                    <option key={cat} value={cat}>{cat}</option>
+                                                                ))}
+                                                            </select>
                                                         ) : (
                                                             producto.categoria || '—'
                                                         )}
@@ -955,9 +1043,21 @@ function Inventario() {
                                                             </button>
                                                         </div>
                                                     ) : (
-                                                        <span className={`inventario-valvic-badge ${(producto.stock || 0) <= 0 ? 'badge-danger' : 'badge-success'}`}>
-                                                            {producto.stock || 0}
-                                                        </span>
+                                                        <div className="stock-display-wrapper">
+                                                            <span className={`inventario-valvic-badge ${(producto.stock || 0) <= 0 ? 'badge-danger' : 'badge-success'}`}>
+                                                                {producto.stock || 0}
+                                                            </span>
+                                                            {(producto.stock || 0) > 0 && (
+                                                                <button 
+                                                                    type="button"
+                                                                    className="stock-btn-mini stock-btn-minus-mini"
+                                                                    onClick={() => descontarStockDirecto(producto)}
+                                                                    title="Descontar 1 unidad"
+                                                                >
+                                                                    −
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </td>
                                             </tr>
@@ -977,13 +1077,21 @@ function Inventario() {
                 </div>
             )}
 
-            {/* Modal de Confirmación */}
+            {/* Modal de Confirmación para Eliminar */}
             <ModalConfirmacion 
                 isOpen={modalConfirmacionOpen}
-                onClose={() => setModalConfirmacionOpen(false)}
+                onClose={() => {
+                    setModalConfirmacionOpen(false);
+                }}
                 onConfirm={eliminarProductosSeleccionados}
                 productos={productosFiltrados.filter(p => productosSeleccionados.includes(p.id))}
                 categoria={`${productosSeleccionados.length} productos`}
+                titulo="Confirmar Eliminación"
+                icono="peligro"
+                botonConfirmar="Eliminar"
+                botonCancelar="Cancelar"
+                tipo="eliminar"
+                loading={cargando}
             />
         </div>
     );

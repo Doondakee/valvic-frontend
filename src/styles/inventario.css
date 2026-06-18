@@ -454,6 +454,63 @@
     border-color: #FFD700;
 }
 
+/********** STOCK CON BOTÓN DESCONTAR **********/
+.stock-display-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stock-btn-mini {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: rgba(189, 188, 188, 0.1);
+    border: 1px solid rgba(241, 60, 60, 0.2);
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.stock-btn-mini:hover {
+    background: rgba(252, 114, 114, 0.2);
+    transform: scale(1.1);
+}
+
+.stock-btn-mini:active {
+    transform: scale(0.9);
+}
+
+/********** SELECT EN MODO EDICIÓN **********/
+.inventario-valvic-edit-select {
+    padding: 4px 8px;
+    background: #1a1a1a;
+    border: 1.5px solid #2a2a2a;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 13px;
+    width: 100%;
+    min-width: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.inventario-valvic-edit-select:focus {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+    outline: none;
+}
+
+.inventario-valvic-edit-select option {
+    background: #0a0a0a;
+    color: #fff;
+}
+
 /********** INPUT DE EDICIÓN EN TABLA **********/
 .inventario-valvic-edit-input {
     padding: 4px 8px;
@@ -948,6 +1005,53 @@
     box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
     outline: none;
 }
+
+/********** MENSAJES TEMPORALES **********/
+.inventario-valvic-message,
+.nuevo-valvic-message,
+.sumador-valvic-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    animation: slideDown 0.3s ease;
+}
+
+.inventario-valvic-message.success,
+.nuevo-valvic-message.success,
+.sumador-valvic-message.success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.inventario-valvic-message.error,
+.nuevo-valvic-message.error,
+.sumador-valvic-message.error {
+    background: rgba(244, 67, 54, 0.1);
+    color: #ff6b6b;
+    border: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+.inventario-valvic-message.info,
+.nuevo-valvic-message.info,
+.sumador-valvic-message.info {
+    background: rgba(33, 150, 243, 0.1);
+    color: #64B5F6;
+    border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 
 /********** RESPONSIVE **********/
 

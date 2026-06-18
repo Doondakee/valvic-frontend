@@ -2,32 +2,29 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
     FaPlus, FaFolderPlus, FaTags, FaDollarSign, FaBarcode, 
-    FaSave, FaTimes, FaBox, FaList, FaFolderOpen, FaEdit, FaTrashAlt
+    FaSave, FaTimes, FaBox, FaList, FaFolderOpen, FaEdit, FaTrashAlt,
+    FaCar, FaInfoCircle, FaMoneyBill
 } from 'react-icons/fa';
 import { MdCategory, MdInventory } from 'react-icons/md';
 import { FiPackage } from 'react-icons/fi';
 import ModalConfirmacion from './modalConfirmacion';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 function Nuevo({ onProductoCreado, onCategoriaCreada }) {
     const [categorias, setCategorias] = useState([]);
     const [categoriasCompletas, setCategoriasCompletas] = useState([]);
     const [cargando, setCargando] = useState(false);
     const [modalAbierto, setModalAbierto] = useState(false);
-    const [tipoModal, setTipoModal] = useState(''); 
+    const [tipoModal, setTipoModal] = useState('');
     const [modalConfirmacionOpen, setModalConfirmacionOpen] = useState(false);
     const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
+    const [loadingEliminar, setLoadingEliminar] = useState(false);
+    const [mensajeTemporal, setMensajeTemporal] = useState(null);
     
-    // Estado para nueva categoría
-    const [nuevaCategoria, setNuevaCategoria] = useState({
-        nombre: ''
-    });
-
-    // Estado para editar categoría
+    const [nuevaCategoria, setNuevaCategoria] = useState({ nombre: '' });
     const [categoriaEditando, setCategoriaEditando] = useState(null);
 
-    // Estado para nuevo producto
     const [nuevoProducto, setNuevoProducto] = useState({
         categoria: '',
         producto: '',
@@ -35,8 +32,16 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
         precio: 0,
         stock: 0,
         codigo: '',
+        vehiculo: '',
+        detalle: '',
+        precio_contado: 0,
+        precio_colocado: 0,
         tieneCodigo: false,
-        tieneContenido: false
+        tieneContenido: false,
+        tieneVehiculo: false,
+        tieneDetalle: false,
+        tienePrecioContado: false,
+        tienePrecioColocado: false
     });
 
     useEffect(() => {
@@ -59,12 +64,15 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
             setCategoriasCompletas(response.data);
         } catch (error) {
             console.error('Error al cargar categorías completas:', error);
-            // Si falla, usar las categorías normales
             cargarCategorias();
         }
     };
 
-    // Abrir modal para nueva categoría
+    const mostrarMensaje = (tipo, texto) => {
+        setMensajeTemporal({ tipo, texto });
+        setTimeout(() => setMensajeTemporal(null), 3000);
+    };
+
     const abrirModalCategoria = () => {
         setTipoModal('categoria');
         setNuevaCategoria({ nombre: '' });
@@ -72,7 +80,6 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
         setModalAbierto(true);
     };
 
-    // Abrir modal para editar categoría
     const abrirModalEditarCategoria = (categoria) => {
         setTipoModal('editarCategoria');
         setCategoriaEditando(categoria);
@@ -80,7 +87,6 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
         setModalAbierto(true);
     };
 
-    // Abrir modal para nuevo producto
     const abrirModalProducto = () => {
         setTipoModal('producto');
         setNuevoProducto({
@@ -90,24 +96,30 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
             precio: 0,
             stock: 0,
             codigo: '',
+            vehiculo: '',
+            detalle: '',
+            precio_contado: 0,
+            precio_colocado: 0,
             tieneCodigo: false,
-            tieneContenido: false
+            tieneContenido: false,
+            tieneVehiculo: false,
+            tieneDetalle: false,
+            tienePrecioContado: false,
+            tienePrecioColocado: false
         });
         setModalAbierto(true);
     };
 
-    // Cerrar modal
     const cerrarModal = () => {
         setModalAbierto(false);
         setTipoModal('');
         setCategoriaEditando(null);
     };
 
-    // Guardar nueva categoría
     const guardarCategoria = async (e) => {
         e.preventDefault();
         if (!nuevaCategoria.nombre.trim()) {
-            alert('El nombre de la categoría es obligatorio');
+            mostrarMensaje('error', '❌ El nombre de la categoría es obligatorio');
             return;
         }
 
@@ -117,25 +129,20 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
             await cargarCategorias();
             await cargarCategoriasCompletas();
             cerrarModal();
-            
-            if (onCategoriaCreada) {
-                onCategoriaCreada();
-            }
-            
-            alert('Categoría creada exitosamente');
+            if (onCategoriaCreada) onCategoriaCreada();
+            mostrarMensaje('success', '✅ Categoría creada exitosamente');
         } catch (error) {
             console.error('Error al crear categoría:', error);
-            alert(error.response?.data?.error || 'Error al crear la categoría');
+            mostrarMensaje('error', '❌ Error al crear la categoría');
         } finally {
             setCargando(false);
         }
     };
 
-    // Guardar edición de categoría
     const guardarEdicionCategoria = async (e) => {
         e.preventDefault();
         if (!nuevaCategoria.nombre.trim()) {
-            alert('El nombre de la categoría es obligatorio');
+            mostrarMensaje('error', '❌ El nombre de la categoría es obligatorio');
             return;
         }
 
@@ -147,90 +154,71 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
             await cargarCategorias();
             await cargarCategoriasCompletas();
             cerrarModal();
-            
-            if (onCategoriaCreada) {
-                onCategoriaCreada();
-            }
-            
-            alert('Categoría actualizada exitosamente');
+            if (onCategoriaCreada) onCategoriaCreada();
+            mostrarMensaje('success', '✅ Categoría actualizada exitosamente');
         } catch (error) {
             console.error('Error al actualizar categoría:', error);
-            alert(error.response?.data?.error || 'Error al actualizar la categoría');
+            mostrarMensaje('error', '❌ Error al actualizar la categoría');
         } finally {
             setCargando(false);
         }
     };
 
-    // Eliminar categoría
-    const eliminarCategoria = async () => {
-        if (!categoriaAEliminar) return;
-
-        try {
-            setCargando(true);
-            const response = await axios.delete(`${API_URL}/categorias/${categoriaAEliminar.id_categoria}`);
-            
-            await cargarCategorias();
-            await cargarCategoriasCompletas();
-            setModalConfirmacionOpen(false);
-            setCategoriaAEliminar(null);
-            
-            if (onCategoriaCreada) {
-                onCategoriaCreada();
-            }
-            
-            alert(response.data.message || 'Categoría eliminada exitosamente');
-        } catch (error) {
-            console.error('Error al eliminar categoría:', error);
-            const mensaje = error.response?.data?.error || 'Error al eliminar la categoría';
-            alert(mensaje);
-            setModalConfirmacionOpen(false);
-        } finally {
-            setCargando(false);
-        }
-    };
-
-    // Abrir modal de confirmación para eliminar
     const confirmarEliminarCategoria = (categoria) => {
         setCategoriaAEliminar(categoria);
         setModalConfirmacionOpen(true);
     };
 
-    // Guardar nuevo producto
+    const eliminarCategoria = async () => {
+        if (!categoriaAEliminar) return;
+
+        setLoadingEliminar(true);
+        try {
+            await axios.delete(`${API_URL}/categorias/${categoriaAEliminar.id_categoria}`);
+            await cargarCategorias();
+            await cargarCategoriasCompletas();
+            setModalConfirmacionOpen(false);
+            setCategoriaAEliminar(null);
+            if (onCategoriaCreada) onCategoriaCreada();
+            mostrarMensaje('success', `🗑️ Categoría "${categoriaAEliminar.categoria}" eliminada`);
+        } catch (error) {
+            console.error('Error al eliminar categoría:', error);
+            mostrarMensaje('error', '❌ ' + (error.response?.data?.error || 'Error al eliminar la categoría'));
+        } finally {
+            setLoadingEliminar(false);
+        }
+    };
+
     const guardarProducto = async (e) => {
         e.preventDefault();
         
         if (!nuevoProducto.categoria) {
-            alert('Debes seleccionar una categoría');
-            return;
-        }
-        
-        if (!nuevoProducto.producto.trim()) {
-            alert('El nombre del producto es obligatorio');
+            mostrarMensaje('error', '❌ Debes seleccionar una categoría');
             return;
         }
 
         const datosProducto = {
             categoria: nuevoProducto.categoria,
-            producto: nuevoProducto.producto,
+            producto: nuevoProducto.producto || '',
             contenido: nuevoProducto.tieneContenido ? nuevoProducto.contenido : '',
             precio: nuevoProducto.precio || 0,
             stock: nuevoProducto.stock || 0,
-            codigo: nuevoProducto.tieneCodigo ? nuevoProducto.codigo : ''
+            codigo: nuevoProducto.tieneCodigo ? nuevoProducto.codigo : '',
+            vehiculo: nuevoProducto.tieneVehiculo ? nuevoProducto.vehiculo : '',
+            detalle: nuevoProducto.tieneDetalle ? nuevoProducto.detalle : '',
+            precio_contado: nuevoProducto.tienePrecioContado ? nuevoProducto.precio_contado : 0,
+            precio_colocado: nuevoProducto.tienePrecioColocado ? nuevoProducto.precio_colocado : 0
         };
 
         try {
             setCargando(true);
             await axios.post(`${API_URL}/productos`, datosProducto);
             cerrarModal();
-            
-            if (onProductoCreado) {
-                onProductoCreado();
-            }
-            
-            alert('Producto creado exitosamente');
+            if (onProductoCreado) onProductoCreado();
+            mostrarMensaje('success', '✅ Producto creado exitosamente');
         } catch (error) {
             console.error('Error al crear producto:', error);
-            alert('Error al crear el producto');
+            mostrarMensaje('error', '❌ Error al crear el producto');
         } finally {
             setCargando(false);
         }
@@ -238,6 +226,12 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
 
     return (
         <div className="nuevo-valvic-container">
+            {mensajeTemporal && (
+                <div className={`nuevo-valvic-message ${mensajeTemporal.tipo}`}>
+                    {mensajeTemporal.texto}
+                </div>
+            )}
+
             <div className="nuevo-valvic-header">
                 <h2 className="nuevo-valvic-title">
                     <FaPlus className="title-icon" /> Crear Nuevo
@@ -248,7 +242,6 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
             </div>
 
             <div className="nuevo-valvic-grid">
-                {/* Tarjeta de Categorías */}
                 <div className="nuevo-valvic-card">
                     <div className="nuevo-valvic-card-header">
                         <MdCategory className="card-icon" />
@@ -305,7 +298,6 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                     </div>
                 </div>
 
-                {/* Tarjeta de Productos */}
                 <div className="nuevo-valvic-card">
                     <div className="nuevo-valvic-card-header">
                         <FaBox className="card-icon" />
@@ -341,7 +333,6 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                 </div>
             </div>
 
-            {/* Modal */}
             {modalAbierto && (
                 <div className="modal-overlay-valvic" onClick={cerrarModal}>
                     <div className="modal-content-valvic" onClick={(e) => e.stopPropagation()}>
@@ -363,7 +354,6 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
 
                         <div className="modal-body-valvic">
                             {(tipoModal === 'categoria' || tipoModal === 'editarCategoria') ? (
-                                // Formulario de Categoría
                                 <form onSubmit={tipoModal === 'categoria' ? guardarCategoria : guardarEdicionCategoria}>
                                     <div className="form-group">
                                         <label className="form-label">
@@ -392,9 +382,7 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                                     </div>
                                 </form>
                             ) : (
-                                // Formulario de Producto
                                 <form onSubmit={guardarProducto}>
-                                    {/* ... resto del formulario de producto (sin cambios) ... */}
                                     <div className="form-group">
                                         <label className="form-label">
                                             <MdCategory className="label-icon" />
@@ -407,8 +395,8 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                                             required
                                         >
                                             <option value="">Seleccionar categoría...</option>
-                                            {categorias.map((cat, index) => (
-                                                <option key={index} value={cat}>{cat}</option>
+                                            {categorias.map((cat) => (
+                                                <option key={cat} value={cat}>{cat}</option>
                                             ))}
                                         </select>
                                         {categorias.length === 0 && (
@@ -421,7 +409,7 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                                     <div className="form-group">
                                         <label className="form-label">
                                             <FaTags className="label-icon" />
-                                            Nombre del Producto *
+                                            Nombre del Producto
                                         </label>
                                         <input
                                             type="text"
@@ -429,7 +417,6 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                                             placeholder="Ej: Neumático 205/55R16"
                                             value={nuevoProducto.producto}
                                             onChange={(e) => setNuevoProducto({ ...nuevoProducto, producto: e.target.value })}
-                                            required
                                             autoFocus
                                         />
                                     </div>
@@ -480,6 +467,122 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                                                 placeholder="Ej: 205/55R16, 5W30, etc."
                                                 value={nuevoProducto.contenido}
                                                 onChange={(e) => setNuevoProducto({ ...nuevoProducto, contenido: e.target.value })}
+                                            />
+                                        )}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label checkbox-label">
+                                            <input
+                                                type="checkbox"
+                                                checked={nuevoProducto.tieneVehiculo}
+                                                onChange={(e) => setNuevoProducto({ 
+                                                    ...nuevoProducto, 
+                                                    tieneVehiculo: e.target.checked,
+                                                    vehiculo: e.target.checked ? nuevoProducto.vehiculo : ''
+                                                })}
+                                            />
+                                            <FaCar className="label-icon" />
+                                            ¿Tiene vehículo?
+                                        </label>
+                                        {nuevoProducto.tieneVehiculo && (
+                                            <input
+                                                type="text"
+                                                className="form-input"
+                                                placeholder="Ej: Gol Trend, Corsa, etc."
+                                                value={nuevoProducto.vehiculo}
+                                                onChange={(e) => setNuevoProducto({ ...nuevoProducto, vehiculo: e.target.value })}
+                                            />
+                                        )}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label checkbox-label">
+                                            <input
+                                                type="checkbox"
+                                                checked={nuevoProducto.tieneDetalle}
+                                                onChange={(e) => setNuevoProducto({ 
+                                                    ...nuevoProducto, 
+                                                    tieneDetalle: e.target.checked,
+                                                    detalle: e.target.checked ? nuevoProducto.detalle : ''
+                                                })}
+                                            />
+                                            <FaInfoCircle className="label-icon" />
+                                            ¿Tiene detalle?
+                                        </label>
+                                        {nuevoProducto.tieneDetalle && (
+                                            <input
+                                                type="text"
+                                                className="form-input"
+                                                placeholder="Ej: Medidas, especificaciones, etc."
+                                                value={nuevoProducto.detalle}
+                                                onChange={(e) => setNuevoProducto({ ...nuevoProducto, detalle: e.target.value })}
+                                            />
+                                        )}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label checkbox-label">
+                                            <input
+                                                type="checkbox"
+                                                checked={nuevoProducto.tienePrecioContado}
+                                                onChange={(e) => setNuevoProducto({ 
+                                                    ...nuevoProducto, 
+                                                    tienePrecioContado: e.target.checked,
+                                                    precio_contado: e.target.checked ? nuevoProducto.precio_contado : 0
+                                                })}
+                                            />
+                                            <FaMoneyBill className="label-icon" />
+                                            ¿Tiene precio contado?
+                                        </label>
+                                        {nuevoProducto.tienePrecioContado && (
+                                            <input
+                                                type="text"
+                                                className="form-input"
+                                                placeholder="0.00"
+                                                value={nuevoProducto.precio_contado || ''}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                                        setNuevoProducto({ 
+                                                            ...nuevoProducto, 
+                                                            precio_contado: value === '' ? 0 : parseFloat(value) || 0 
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label checkbox-label">
+                                            <input
+                                                type="checkbox"
+                                                checked={nuevoProducto.tienePrecioColocado}
+                                                onChange={(e) => setNuevoProducto({ 
+                                                    ...nuevoProducto, 
+                                                    tienePrecioColocado: e.target.checked,
+                                                    precio_colocado: e.target.checked ? nuevoProducto.precio_colocado : 0
+                                                })}
+                                            />
+                                            <FaMoneyBill className="label-icon" />
+                                            ¿Tiene precio colocado?
+                                        </label>
+                                        {nuevoProducto.tienePrecioColocado && (
+                                            <input
+                                                type="text"
+                                                className="form-input"
+                                                placeholder="0.00"
+                                                value={nuevoProducto.precio_colocado || ''}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                                        setNuevoProducto({ 
+                                                            ...nuevoProducto, 
+                                                            precio_colocado: value === '' ? 0 : parseFloat(value) || 0 
+                                                        });
+                                                    }
+                                                }}
                                             />
                                         )}
                                     </div>
@@ -546,7 +649,6 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                 </div>
             )}
 
-            {/* Modal de Confirmación para Eliminar Categoría */}
             <ModalConfirmacion 
                 isOpen={modalConfirmacionOpen}
                 onClose={() => {
@@ -556,6 +658,13 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                 onConfirm={eliminarCategoria}
                 productos={[]}
                 categoria={categoriaAEliminar ? `"${categoriaAEliminar.categoria}"` : ''}
+                titulo="Eliminar Categoría"
+                mensaje={`¿Estás seguro de que deseas eliminar la categoría "${categoriaAEliminar?.categoria}"?`}
+                icono="peligro"
+                botonConfirmar="Eliminar"
+                botonCancelar="Cancelar"
+                tipo="eliminar"
+                loading={loadingEliminar}
             />
         </div>
     );

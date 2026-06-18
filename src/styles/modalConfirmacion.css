@@ -1,0 +1,42 @@
+/********** MODAL CONFIRMACIÓN **********/
+.modal-icon-danger {
+    color: #ff6b6b;
+    font-size: 24px;
+}
+
+.modal-icon-question {
+    color: #FFD700;
+    font-size: 24px;
+}
+
+.modal-icon-info {
+    color: #64B5F6;
+    font-size: 24px;
+}
+
+.modal-btn-confirm.modal-btn-danger {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+
+.modal-btn-confirm.modal-btn-danger:hover:not(:disabled) {
+    box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
+}
+
+.modal-btn-confirm.modal-btn-warning {
+    background: linear-gradient(135deg, #FFD700, #e6c200);
+    color: #000;
+}
+
+.modal-btn-confirm.modal-btn-warning:hover:not(:disabled) {
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+}
+
+.modal-btn-confirm.modal-btn-warning .btn-icon {
+    color: #000;
+}
+
+.modal-btn-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}

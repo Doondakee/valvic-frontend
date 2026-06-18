@@ -5,6 +5,7 @@ import Inventario from './components/inventario';
 import Usuarios from './components/usuarios';
 import Nuevo from './components/nuevo';
 import Sumador from './components/sumador';
+import ModalConfirmacion from './components/modalConfirmacion';
 import './styles/global.css';
 import './styles/login.css';
 import './styles/header.css';
@@ -13,6 +14,7 @@ import './styles/usuarios.css';
 import './styles/nuevo.css';
 import './styles/sumador.css';
 import './styles/solicitarRegistro.css';
+import './styles/modalConfirmacion.css';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

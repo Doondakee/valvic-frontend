@@ -1,8 +1,11 @@
-// Sumador.jsx - Con botones Aumentar y Restar
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaPercent, FaSave, FaTags, FaDollarSign, FaList, FaSearch, FaExclamationTriangle, FaEdit, FaPlus, FaMinus } from 'react-icons/fa';
+import { 
+    FaPercent, FaSave, FaTags, FaDollarSign, FaList, FaSearch, 
+    FaExclamationTriangle, FaEdit, FaPlus, FaMinus 
+} from 'react-icons/fa';
 import { MdCategory, MdInventory } from 'react-icons/md';
+import ModalConfirmacion from './modalConfirmacion';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -17,9 +20,11 @@ function Sumador() {
     const [mensaje, setMensaje] = useState('');
     const [productosModificados, setProductosModificados] = useState([]);
     const [mostrarPreciosNuevos, setMostrarPreciosNuevos] = useState(false);
-    const [tipoOperacion, setTipoOperacion] = useState('aumentar'); // 'aumentar' o 'restar'
+    const [tipoOperacion, setTipoOperacion] = useState('aumentar');
+    
+    const [modalConfirmacionOpen, setModalConfirmacionOpen] = useState(false);
+    const [loadingConfirmacion, setLoadingConfirmacion] = useState(false);
 
-    // Cargar categorías al montar el componente
     useEffect(() => {
         cargarCategorias();
     }, []);
@@ -45,17 +50,11 @@ function Sumador() {
             const response = await axios.get(`${API_URL}/productos`);
             const productosFiltrados = response.data.filter(p => p.categoria === categoria);
             
-            // Ordenar por nombre
             productosFiltrados.sort((a, b) => a.producto.localeCompare(b.producto));
             
             setProductos(productosFiltrados);
             setProductosFiltrados(productosFiltrados);
             
-            if (productosFiltrados.length === 0) {
-                setMensaje({ tipo: 'info', texto: 'No hay productos en esta categoría' });
-            } else {
-                setMensaje({ tipo: 'success', texto: `${productosFiltrados.length} productos encontrados` });
-            }
         } catch (error) {
             console.error('Error al cargar productos:', error);
             setMensaje({ tipo: 'error', texto: 'Error al cargar productos' });
@@ -105,7 +104,6 @@ function Sumador() {
         const textoOperacion = tipo === 'aumentar' ? 'aumento' : 'descuento';
         const signo = tipo === 'aumentar' ? '+' : '-';
 
-        // Calcular nuevos precios
         const modificados = productosFiltrados.map(producto => ({
             ...producto,
             precio_original: producto.precio,
@@ -120,29 +118,27 @@ function Sumador() {
         });
     };
 
-    const guardarCambios = async () => {
+    const abrirModalConfirmacion = () => {
         if (productosModificados.length === 0) {
             setMensaje({ tipo: 'error', texto: 'No hay cambios para guardar' });
             return;
         }
 
-        // Verificar que todos los precios nuevos sean válidos
         const preciosInvalidos = productosModificados.filter(p => p.precio_nuevo <= 0);
         if (preciosInvalidos.length > 0) {
             setMensaje({ 
                 tipo: 'error', 
-                texto: `Hay ${preciosInvalidos.length} productos con precio inválido. Verifica que todos los precios sean mayores a 0.` 
+                texto: `Hay ${preciosInvalidos.length} productos con precio inválido.` 
             });
             return;
         }
 
-        const textoOperacion = tipoOperacion === 'aumentar' ? 'aumentar' : 'descontar';
-        if (!confirm(`¿Estás seguro de ${textoOperacion} los precios de ${productosModificados.length} productos?`)) {
-            return;
-        }
+        setModalConfirmacionOpen(true);
+    };
 
-        setGuardando(true);
-        setMensaje({ tipo: 'info', texto: 'Guardando cambios...' });
+    const guardarCambios = async () => {
+        setLoadingConfirmacion(true);
+        const textoOperacion = tipoOperacion === 'aumentar' ? 'aumentar' : 'descontar';
 
         try {
             let actualizados = 0;
@@ -173,16 +169,17 @@ function Sumador() {
                 });
             }
 
-            // Recargar productos para ver los cambios
             await cargarProductos(categoriaSeleccionada);
             setProductosModificados([]);
             setMostrarPreciosNuevos(false);
             setPorcentaje(10);
+            setModalConfirmacionOpen(false);
 
         } catch (error) {
             console.error('Error al guardar cambios:', error);
             setMensaje({ tipo: 'error', texto: 'Error al guardar los cambios' });
         } finally {
+            setLoadingConfirmacion(false);
             setGuardando(false);
         }
     };
@@ -193,12 +190,10 @@ function Sumador() {
         setMensaje({ tipo: 'info', texto: 'Cambios cancelados' });
     };
 
-    // Redondear a la centena más cercana
     const redondearACentena = (numero) => {
-        return Math.round(numero / 100) * 100;
+        return Math.ceil(numero / 100) * 100;
     };
 
-    // Redondear todos los precios nuevos a la centena
     const redondearTodosACentena = () => {
         setProductosModificados(prev => 
             prev.map(p => ({
@@ -206,7 +201,21 @@ function Sumador() {
                 precio_nuevo: redondearACentena(p.precio_nuevo)
             }))
         );
-        setMensaje({ tipo: 'info', texto: 'Todos los precios redondeados a la centena más cercana' });
+        setMensaje({ tipo: 'info', texto: 'Todos los precios redondeados a la centena superior' });
+    };
+
+    const actualizarPrecioNuevo = (productoId, nuevoPrecio) => {
+        setProductosModificados(prev => 
+            prev.map(p => {
+                if (p.id === productoId) {
+                    return {
+                        ...p,
+                        precio_nuevo: nuevoPrecio
+                    };
+                }
+                return p;
+            })
+        );
     };
 
     return (
@@ -220,7 +229,6 @@ function Sumador() {
                 </p>
             </div>
 
-            {/* Barra de herramientas */}
             <div className="sumador-valvic-toolbar">
                 <div className="sumador-valvic-toolbar-left">
                     <div className="sumador-valvic-selector">
@@ -274,7 +282,7 @@ function Sumador() {
                         <button
                             className="sumador-valvic-btn-secondary"
                             onClick={redondearTodosACentena}
-                            title="Redondear todos los precios a la centena más cercana"
+                            title="Redondear todos los precios a la centena superior"
                         >
                             Redondear a Centena
                         </button>
@@ -286,7 +294,7 @@ function Sumador() {
                         <>
                             <button
                                 className="sumador-valvic-btn-success"
-                                onClick={guardarCambios}
+                                onClick={abrirModalConfirmacion}
                                 disabled={guardando}
                             >
                                 <FaSave className="btn-icon" /> 
@@ -304,14 +312,12 @@ function Sumador() {
                 </div>
             </div>
 
-            {/* Mensaje de estado */}
             {mensaje && (
                 <div className={`sumador-valvic-message ${mensaje.tipo}`}>
                     {mensaje.texto}
                 </div>
             )}
 
-            {/* Tabla de productos */}
             {categoriaSeleccionada && (
                 <div className="sumador-valvic-table-container">
                     <div className="sumador-valvic-table-header">
@@ -409,6 +415,20 @@ function Sumador() {
                     )}
                 </div>
             )}
+
+            <ModalConfirmacion 
+                isOpen={modalConfirmacionOpen}
+                onClose={() => {
+                    setModalConfirmacionOpen(false);
+                }}
+                onConfirm={guardarCambios}
+                titulo={`Confirmar ${tipoOperacion === 'aumentar' ? 'Aumento' : 'Descuento'}`}
+                icono="pregunta"
+                botonConfirmar={tipoOperacion === 'aumentar' ? 'Aumentar' : 'Descontar'}
+                botonCancelar="Cancelar"
+                tipo={tipoOperacion === 'aumentar' ? 'descontar' : 'eliminar'}
+                loading={loadingConfirmacion}
+            />
         </div>
     );
 }
