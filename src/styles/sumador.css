@@ -146,10 +146,11 @@
 }
 
 /********** BOTONES **********/
-.sumador-valvic-btn-primary {
+/********** BOTONES AUMENTAR Y RESTAR **********/
+.sumador-valvic-btn-aumentar {
     padding: 10px 24px;
-    background: linear-gradient(135deg, #FFD700, #e6c200);
-    color: #000;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: #fff;
     border: none;
     border-radius: 8px;
     font-weight: 600;
@@ -161,14 +162,63 @@
     gap: 8px;
 }
 
-.sumador-valvic-btn-primary:hover:not(:disabled) {
+.sumador-valvic-btn-aumentar:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
 }
 
-.sumador-valvic-btn-primary:disabled {
+.sumador-valvic-btn-aumentar:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+.sumador-valvic-btn-restar {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sumador-valvic-btn-restar:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
+}
+
+.sumador-valvic-btn-restar:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/********** PORCENTAJE APLICADO **********/
+.porcentaje-aplicado.aumento {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4CAF50;
+}
+
+.porcentaje-aplicado.descuento {
+    background: rgba(244, 67, 54, 0.15);
+    color: #ff6b6b;
+}
+
+/********** CAMBIO **********/
+.cambio {
+    font-size: 13px;
+}
+
+.cambio-positivo {
+    color: #4CAF50;
+}
+
+.cambio-negativo {
+    color: #ff6b6b;
 }
 
 .sumador-valvic-btn-success {

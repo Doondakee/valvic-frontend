@@ -187,6 +187,72 @@
     box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
 }
 
+/********** CATEGORÍA CON ACCIONES **********/
+.categoria-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    color: #ddd;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: all 0.2s ease;
+    border-radius: 4px;
+}
+
+.categoria-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.categoria-nombre {
+    flex: 1;
+}
+
+.categoria-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.categoria-btn-edit,
+.categoria-btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.categoria-btn-edit {
+    color: #FFD700;
+}
+
+.categoria-btn-edit:hover {
+    background: rgba(255, 215, 0, 0.1);
+    transform: scale(1.1);
+}
+
+.categoria-btn-delete {
+    color: #ff6b6b;
+}
+
+.categoria-btn-delete:hover {
+    background: rgba(255, 0, 0, 0.1);
+    transform: scale(1.1);
+}
+
+.item-icon {
+    color: #FFD700;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
 /********** FORMULARIOS DEL MODAL **********/
 .form-group {
     margin-bottom: 16px;

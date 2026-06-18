@@ -1,21 +1,33 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaPlus, FaFolderPlus, FaTags, FaDollarSign, FaBarcode, FaSave, FaTimes, FaBox, FaList, FaFolderOpen } from 'react-icons/fa';
+import { 
+    FaPlus, FaFolderPlus, FaTags, FaDollarSign, FaBarcode, 
+    FaSave, FaTimes, FaBox, FaList, FaFolderOpen, FaEdit, FaTrashAlt
+} from 'react-icons/fa';
 import { MdCategory, MdInventory } from 'react-icons/md';
 import { FiPackage } from 'react-icons/fi';
+import ModalConfirmacion from './modalConfirmacion';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 function Nuevo({ onProductoCreado, onCategoriaCreada }) {
     const [categorias, setCategorias] = useState([]);
+    const [categoriasCompletas, setCategoriasCompletas] = useState([]);
     const [cargando, setCargando] = useState(false);
     const [modalAbierto, setModalAbierto] = useState(false);
-    const [tipoModal, setTipoModal] = useState(''); // 'categoria' o 'producto'
+    const [tipoModal, setTipoModal] = useState(''); 
+    const [modalConfirmacionOpen, setModalConfirmacionOpen] = useState(false);
+    const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
     
+    // Estado para nueva categoría
     const [nuevaCategoria, setNuevaCategoria] = useState({
         nombre: ''
     });
 
+    // Estado para editar categoría
+    const [categoriaEditando, setCategoriaEditando] = useState(null);
+
+    // Estado para nuevo producto
     const [nuevoProducto, setNuevoProducto] = useState({
         categoria: '',
         producto: '',
@@ -29,6 +41,7 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
 
     useEffect(() => {
         cargarCategorias();
+        cargarCategoriasCompletas();
     }, []);
 
     const cargarCategorias = async () => {
@@ -40,12 +53,34 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
         }
     };
 
+    const cargarCategoriasCompletas = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/categorias/completo`);
+            setCategoriasCompletas(response.data);
+        } catch (error) {
+            console.error('Error al cargar categorías completas:', error);
+            // Si falla, usar las categorías normales
+            cargarCategorias();
+        }
+    };
+
+    // Abrir modal para nueva categoría
     const abrirModalCategoria = () => {
         setTipoModal('categoria');
         setNuevaCategoria({ nombre: '' });
+        setCategoriaEditando(null);
         setModalAbierto(true);
     };
 
+    // Abrir modal para editar categoría
+    const abrirModalEditarCategoria = (categoria) => {
+        setTipoModal('editarCategoria');
+        setCategoriaEditando(categoria);
+        setNuevaCategoria({ nombre: categoria.categoria });
+        setModalAbierto(true);
+    };
+
+    // Abrir modal para nuevo producto
     const abrirModalProducto = () => {
         setTipoModal('producto');
         setNuevoProducto({
@@ -65,6 +100,7 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
     const cerrarModal = () => {
         setModalAbierto(false);
         setTipoModal('');
+        setCategoriaEditando(null);
     };
 
     // Guardar nueva categoría
@@ -79,6 +115,7 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
             setCargando(true);
             await axios.post(`${API_URL}/categorias`, { nombre: nuevaCategoria.nombre });
             await cargarCategorias();
+            await cargarCategoriasCompletas();
             cerrarModal();
             
             if (onCategoriaCreada) {
@@ -88,10 +125,74 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
             alert('Categoría creada exitosamente');
         } catch (error) {
             console.error('Error al crear categoría:', error);
-            alert('Error al crear la categoría');
+            alert(error.response?.data?.error || 'Error al crear la categoría');
         } finally {
             setCargando(false);
         }
+    };
+
+    // Guardar edición de categoría
+    const guardarEdicionCategoria = async (e) => {
+        e.preventDefault();
+        if (!nuevaCategoria.nombre.trim()) {
+            alert('El nombre de la categoría es obligatorio');
+            return;
+        }
+
+        try {
+            setCargando(true);
+            await axios.put(`${API_URL}/categorias/${categoriaEditando.id_categoria}`, { 
+                categoria: nuevaCategoria.nombre.trim() 
+            });
+            await cargarCategorias();
+            await cargarCategoriasCompletas();
+            cerrarModal();
+            
+            if (onCategoriaCreada) {
+                onCategoriaCreada();
+            }
+            
+            alert('Categoría actualizada exitosamente');
+        } catch (error) {
+            console.error('Error al actualizar categoría:', error);
+            alert(error.response?.data?.error || 'Error al actualizar la categoría');
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    // Eliminar categoría
+    const eliminarCategoria = async () => {
+        if (!categoriaAEliminar) return;
+
+        try {
+            setCargando(true);
+            const response = await axios.delete(`${API_URL}/categorias/${categoriaAEliminar.id_categoria}`);
+            
+            await cargarCategorias();
+            await cargarCategoriasCompletas();
+            setModalConfirmacionOpen(false);
+            setCategoriaAEliminar(null);
+            
+            if (onCategoriaCreada) {
+                onCategoriaCreada();
+            }
+            
+            alert(response.data.message || 'Categoría eliminada exitosamente');
+        } catch (error) {
+            console.error('Error al eliminar categoría:', error);
+            const mensaje = error.response?.data?.error || 'Error al eliminar la categoría';
+            alert(mensaje);
+            setModalConfirmacionOpen(false);
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    // Abrir modal de confirmación para eliminar
+    const confirmarEliminarCategoria = (categoria) => {
+        setCategoriaAEliminar(categoria);
+        setModalConfirmacionOpen(true);
     };
 
     // Guardar nuevo producto
@@ -108,7 +209,6 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
             return;
         }
 
-        // Preparar datos para enviar
         const datosProducto = {
             categoria: nuevoProducto.categoria,
             producto: nuevoProducto.producto,
@@ -148,10 +248,12 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
             </div>
 
             <div className="nuevo-valvic-grid">
+                {/* Tarjeta de Categorías */}
                 <div className="nuevo-valvic-card">
                     <div className="nuevo-valvic-card-header">
                         <MdCategory className="card-icon" />
                         <h3>Categorías</h3>
+                        <span className="badge-count">{categorias.length}</span>
                     </div>
                     
                     <div className="nuevo-valvic-card-body">
@@ -161,17 +263,33 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                                     <span className="spinner-valvic"></span>
                                     Cargando categorías...
                                 </div>
-                            ) : categorias.length === 0 ? (
+                            ) : categoriasCompletas.length === 0 ? (
                                 <div className="empty-state">
                                     <FaFolderOpen className="empty-icon" />
                                     <p>No hay categorías creadas</p>
                                 </div>
                             ) : (
                                 <ul className="categoria-items">
-                                    {categorias.map((cat, index) => (
-                                        <li key={index} className="categoria-item">
+                                    {categoriasCompletas.map((cat) => (
+                                        <li key={cat.id_categoria} className="categoria-item">
                                             <FaFolderOpen className="item-icon" />
-                                            <span>{cat}</span>
+                                            <span className="categoria-nombre">{cat.categoria}</span>
+                                            <div className="categoria-actions">
+                                                <button 
+                                                    className="categoria-btn-edit"
+                                                    onClick={() => abrirModalEditarCategoria(cat)}
+                                                    title="Editar categoría"
+                                                >
+                                                    <FaEdit />
+                                                </button>
+                                                <button 
+                                                    className="categoria-btn-delete"
+                                                    onClick={() => confirmarEliminarCategoria(cat)}
+                                                    title="Eliminar categoría"
+                                                >
+                                                    <FaTrashAlt />
+                                                </button>
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
@@ -187,6 +305,7 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                     </div>
                 </div>
 
+                {/* Tarjeta de Productos */}
                 <div className="nuevo-valvic-card">
                     <div className="nuevo-valvic-card-header">
                         <FaBox className="card-icon" />
@@ -210,9 +329,14 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                         <button 
                             className="nuevo-valvic-btn-success"
                             onClick={abrirModalProducto}
+                            disabled={categorias.length === 0}
+                            title={categorias.length === 0 ? 'Primero debes crear una categoría' : ''}
                         >
                             <FaPlus className="btn-icon" /> Nuevo Producto
                         </button>
+                        {categorias.length === 0 && (
+                            <span className="disabled-hint">⚠️ Necesitas crear una categoría primero</span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -223,10 +347,14 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                     <div className="modal-content-valvic" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header-valvic">
                             <div className="modal-header-icon">
-                                {tipoModal === 'categoria' ? <FaFolderPlus /> : <FaPlus />}
+                                {tipoModal === 'categoria' ? <FaFolderPlus /> : 
+                                 tipoModal === 'editarCategoria' ? <FaEdit /> : 
+                                 <FaPlus />}
                             </div>
                             <h2 className="modal-title-valvic">
-                                {tipoModal === 'categoria' ? 'Nueva Categoría' : 'Nuevo Producto'}
+                                {tipoModal === 'categoria' ? 'Nueva Categoría' : 
+                                 tipoModal === 'editarCategoria' ? 'Editar Categoría' : 
+                                 'Nuevo Producto'}
                             </h2>
                             <button className="modal-close-btn" onClick={cerrarModal}>
                                 <FaTimes />
@@ -234,12 +362,13 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                         </div>
 
                         <div className="modal-body-valvic">
-                            {tipoModal === 'categoria' ? (
-                                <form onSubmit={guardarCategoria}>
+                            {(tipoModal === 'categoria' || tipoModal === 'editarCategoria') ? (
+                                // Formulario de Categoría
+                                <form onSubmit={tipoModal === 'categoria' ? guardarCategoria : guardarEdicionCategoria}>
                                     <div className="form-group">
                                         <label className="form-label">
                                             <MdCategory className="label-icon" />
-                                            Nombre de la Categoría *
+                                            {tipoModal === 'categoria' ? 'Nombre de la Categoría *' : 'Nuevo nombre de la Categoría *'}
                                         </label>
                                         <input
                                             type="text"
@@ -258,12 +387,14 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                                         </button>
                                         <button type="submit" className="modal-btn-confirm" disabled={cargando}>
                                             <FaSave className="btn-icon" /> 
-                                            {cargando ? 'Guardando...' : 'Guardar Categoría'}
+                                            {cargando ? 'Guardando...' : tipoModal === 'categoria' ? 'Guardar Categoría' : 'Actualizar Categoría'}
                                         </button>
                                     </div>
                                 </form>
                             ) : (
+                                // Formulario de Producto
                                 <form onSubmit={guardarProducto}>
+                                    {/* ... resto del formulario de producto (sin cambios) ... */}
                                     <div className="form-group">
                                         <label className="form-label">
                                             <MdCategory className="label-icon" />
@@ -414,6 +545,18 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                     </div>
                 </div>
             )}
+
+            {/* Modal de Confirmación para Eliminar Categoría */}
+            <ModalConfirmacion 
+                isOpen={modalConfirmacionOpen}
+                onClose={() => {
+                    setModalConfirmacionOpen(false);
+                    setCategoriaAEliminar(null);
+                }}
+                onConfirm={eliminarCategoria}
+                productos={[]}
+                categoria={categoriaAEliminar ? `"${categoriaAEliminar.categoria}"` : ''}
+            />
         </div>
     );
 }

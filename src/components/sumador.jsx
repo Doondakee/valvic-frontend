@@ -1,6 +1,7 @@
+// Sumador.jsx - Con botones Aumentar y Restar
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaPercent, FaSave, FaTags, FaDollarSign, FaList, FaSearch, FaExclamationTriangle, FaEdit } from 'react-icons/fa';
+import { FaPercent, FaSave, FaTags, FaDollarSign, FaList, FaSearch, FaExclamationTriangle, FaEdit, FaPlus, FaMinus } from 'react-icons/fa';
 import { MdCategory, MdInventory } from 'react-icons/md';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -16,6 +17,7 @@ function Sumador() {
     const [mensaje, setMensaje] = useState('');
     const [productosModificados, setProductosModificados] = useState([]);
     const [mostrarPreciosNuevos, setMostrarPreciosNuevos] = useState(false);
+    const [tipoOperacion, setTipoOperacion] = useState('aumentar'); // 'aumentar' o 'restar'
 
     // Cargar categorías al montar el componente
     useEffect(() => {
@@ -68,32 +70,22 @@ function Sumador() {
         setProductosFiltrados([]);
         setProductosModificados([]);
         setMostrarPreciosNuevos(false);
+        setTipoOperacion('aumentar');
         
         if (categoria) {
             await cargarProductos(categoria);
         }
     };
 
-    const calcularPrecioConAumento = (precio, porcentaje) => {
-        return precio * (1 + (porcentaje / 100));
+    const calcularPrecioConCambio = (precio, porcentaje, tipo) => {
+        if (tipo === 'aumentar') {
+            return precio * (1 + (porcentaje / 100));
+        } else {
+            return precio * (1 - (porcentaje / 100));
+        }
     };
 
-    // Función para actualizar el precio nuevo de un producto específico
-    const actualizarPrecioNuevo = (productoId, nuevoPrecio) => {
-        setProductosModificados(prev => 
-            prev.map(p => {
-                if (p.id === productoId) {
-                    return {
-                        ...p,
-                        precio_nuevo: nuevoPrecio
-                    };
-                }
-                return p;
-            })
-        );
-    };
-
-    const aplicarPorcentaje = () => {
+    const aplicarCambio = (tipo) => {
         if (!categoriaSeleccionada) {
             setMensaje({ tipo: 'error', texto: 'Primero selecciona una categoría' });
             return;
@@ -109,18 +101,22 @@ function Sumador() {
             return;
         }
 
+        setTipoOperacion(tipo);
+        const textoOperacion = tipo === 'aumentar' ? 'aumento' : 'descuento';
+        const signo = tipo === 'aumentar' ? '+' : '-';
+
         // Calcular nuevos precios
         const modificados = productosFiltrados.map(producto => ({
             ...producto,
             precio_original: producto.precio,
-            precio_nuevo: Math.round(calcularPrecioConAumento(producto.precio, porcentaje))
+            precio_nuevo: Math.round(calcularPrecioConCambio(producto.precio, porcentaje, tipo))
         }));
 
         setProductosModificados(modificados);
         setMostrarPreciosNuevos(true);
         setMensaje({ 
             tipo: 'success', 
-            texto: `Se aplicará un ${porcentaje}% de aumento a ${modificados.length} productos. Puedes editar los precios nuevos antes de guardar.` 
+            texto: `Se aplicará un ${signo}${porcentaje}% de ${textoOperacion} a ${modificados.length} productos. Puedes editar los precios nuevos antes de guardar.` 
         });
     };
 
@@ -140,7 +136,8 @@ function Sumador() {
             return;
         }
 
-        if (!confirm(`¿Estás seguro de actualizar los precios de ${productosModificados.length} productos?`)) {
+        const textoOperacion = tipoOperacion === 'aumentar' ? 'aumentar' : 'descontar';
+        if (!confirm(`¿Estás seguro de ${textoOperacion} los precios de ${productosModificados.length} productos?`)) {
             return;
         }
 
@@ -219,7 +216,7 @@ function Sumador() {
                     <FaPercent className="title-icon" /> Sumador de Porcentajes
                 </h2>
                 <p className="sumador-valvic-subtitle">
-                    Aumenta los precios de todos los productos de una categoría
+                    Aumenta o descuenta los precios de todos los productos de una categoría
                 </p>
             </div>
 
@@ -258,11 +255,19 @@ function Sumador() {
                     </div>
 
                     <button
-                        className="sumador-valvic-btn-primary"
-                        onClick={aplicarPorcentaje}
+                        className="sumador-valvic-btn-aumentar"
+                        onClick={() => aplicarCambio('aumentar')}
                         disabled={!categoriaSeleccionada || productosFiltrados.length === 0 || cargando}
                     >
-                        <FaPercent className="btn-icon" /> Aplicar
+                        <FaPlus className="btn-icon" /> Aumentar
+                    </button>
+
+                    <button
+                        className="sumador-valvic-btn-restar"
+                        onClick={() => aplicarCambio('restar')}
+                        disabled={!categoriaSeleccionada || productosFiltrados.length === 0 || cargando}
+                    >
+                        <FaMinus className="btn-icon" /> Restar
                     </button>
 
                     {mostrarPreciosNuevos && (
@@ -299,12 +304,14 @@ function Sumador() {
                 </div>
             </div>
 
+            {/* Mensaje de estado */}
             {mensaje && (
                 <div className={`sumador-valvic-message ${mensaje.tipo}`}>
                     {mensaje.texto}
                 </div>
             )}
 
+            {/* Tabla de productos */}
             {categoriaSeleccionada && (
                 <div className="sumador-valvic-table-container">
                     <div className="sumador-valvic-table-header">
@@ -315,8 +322,8 @@ function Sumador() {
                         </div>
                         {mostrarPreciosNuevos && (
                             <div className="table-actions">
-                                <span className="porcentaje-aplicado">
-                                    +{porcentaje}%
+                                <span className={`porcentaje-aplicado ${tipoOperacion === 'aumentar' ? 'aumento' : 'descuento'}`}>
+                                    {tipoOperacion === 'aumentar' ? '+' : '-'}{porcentaje}%
                                 </span>
                                 <span className="precios-editables">
                                     <FaEdit className="edit-icon" /> Precios editables
@@ -345,7 +352,7 @@ function Sumador() {
                                     {mostrarPreciosNuevos && (
                                         <>
                                             <th>Precio Nuevo</th>
-                                            <th>Aumento</th>
+                                            <th>Cambio</th>
                                         </>
                                     )}
                                 </tr>
@@ -354,7 +361,7 @@ function Sumador() {
                                 {productosFiltrados.map(producto => {
                                     const modificado = productosModificados.find(p => p.id === producto.id);
                                     const precioNuevo = modificado ? modificado.precio_nuevo : null;
-                                    const aumento = modificado ? (modificado.precio_nuevo - producto.precio) : 0;
+                                    const cambio = modificado ? (modificado.precio_nuevo - producto.precio) : 0;
 
                                     return (
                                         <tr key={producto.id} className={modificado ? 'sumador-valvic-row-modificado' : ''}>
@@ -380,10 +387,10 @@ function Sumador() {
                                                             onFocus={(e) => e.target.select()}
                                                         />
                                                     </td>
-                                                    <td className="aumento">
-                                                        {aumento !== 0 && (
-                                                            <span className={aumento > 0 ? 'aumento-positivo' : 'aumento-negativo'}>
-                                                                {aumento > 0 ? '▲' : '▼'} ${Math.abs(aumento).toLocaleString('es-AR')}
+                                                    <td className="cambio">
+                                                        {cambio !== 0 && (
+                                                            <span className={cambio > 0 ? 'cambio-positivo' : 'cambio-negativo'}>
+                                                                {cambio > 0 ? '▲' : '▼'} ${Math.abs(cambio).toLocaleString('es-AR')}
                                                             </span>
                                                         )}
                                                     </td>
@@ -391,7 +398,7 @@ function Sumador() {
                                             ) : mostrarPreciosNuevos ? (
                                                 <>
                                                     <td className="precio-nuevo">—</td>
-                                                    <td className="aumento">—</td>
+                                                    <td className="cambio">—</td>
                                                 </>
                                             ) : null}
                                         </tr>

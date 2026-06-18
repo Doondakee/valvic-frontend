@@ -5,7 +5,7 @@ import logoValvic from '../assets/valvic.png';
 // ICONOS
 import { FaSearch, FaEdit, FaTrashAlt, FaBox, FaTags, FaDollarSign, FaBarcode, FaSave, FaTimes, FaFolderOpen,
     FaFolder, FaFolderPlus, FaStore, FaList, FaClipboardCheck, FaExclamationTriangle, FaPlus, FaDatabase,
-    FaCheck, FaCheckDouble
+    FaCheck, FaCheckDouble, FaCar, FaInfoCircle, FaMoneyBill
 } from 'react-icons/fa';
 
 import { MdCategory, MdInventory, MdProductionQuantityLimits, MdDashboard, MdOutlineCategory, MdFolder, 
@@ -34,17 +34,82 @@ function Inventario() {
     const [productosSeleccionados, setProductosSeleccionados] = useState([]);
     const [modalConfirmacionOpen, setModalConfirmacionOpen] = useState(false);
 
+    // Estado para columnas visibles
+    const [columnasVisibles, setColumnasVisibles] = useState({
+        mostrarCodigo: true,
+        mostrarCategoria: true,
+        mostrarProducto: true,
+        mostrarVehiculo: true,
+        mostrarDetalle: true,
+        mostrarContenido: true,
+        mostrarPrecioContado: true,
+        mostrarPrecio: true,
+        mostrarPrecioColocado: true
+    });
+
     const [nuevoProducto, setNuevoProducto] = useState({
         categoria: '',
         producto: '',
         contenido: '',
         precio: 0,
         stock: 0,
-        codigo: ''
+        codigo: '',
+        vehiculo: '',
+        detalle: '',
+        precio_contado: 0,
+        precio_colocado: 0
     });
 
     const rol = localStorage.getItem('rol');
     const esAdmin = rol === 'administrador';
+
+    // Función para verificar si un valor está vacío (NULL o string vacío)
+    const estaVacio = (valor) => {
+        return valor === null || valor === undefined || valor === '';
+    };
+
+    // Determinar qué columnas mostrar
+    const determinarColumnasVisibles = (productosData, esTodas) => {
+        if (!productosData || productosData.length === 0) {
+            return {
+                mostrarCodigo: true,
+                mostrarCategoria: true,
+                mostrarProducto: true,
+                mostrarVehiculo: true,
+                mostrarDetalle: true,
+                mostrarContenido: true,
+                mostrarPrecioContado: true,
+                mostrarPrecio: true,
+                mostrarPrecioColocado: true
+            };
+        }
+
+        if (esTodas) {
+            return {
+                mostrarCodigo: true,
+                mostrarCategoria: true,
+                mostrarProducto: true,
+                mostrarVehiculo: true,
+                mostrarDetalle: true,
+                mostrarContenido: true,
+                mostrarPrecioContado: true,
+                mostrarPrecio: true,
+                mostrarPrecioColocado: true
+            };
+        }
+
+        return {
+            mostrarCodigo: productosData.some(p => !estaVacio(p.codigo)),
+            mostrarCategoria: true, // Siempre visible
+            mostrarProducto: true, // Siempre visible
+            mostrarVehiculo: productosData.some(p => !estaVacio(p.vehiculo)),
+            mostrarDetalle: productosData.some(p => !estaVacio(p.detalle)),
+            mostrarContenido: productosData.some(p => !estaVacio(p.contenido)),
+            mostrarPrecioContado: productosData.some(p => !estaVacio(p.precio_contado) && p.precio_contado > 0),
+            mostrarPrecio: true, // Siempre visible
+            mostrarPrecioColocado: productosData.some(p => !estaVacio(p.precio_colocado) && p.precio_colocado > 0)
+        };
+    };
 
     const cargarCategorias = async () => {
         try {
@@ -63,12 +128,18 @@ function Inventario() {
             const response = await axios.get(`${API_URL}/productos`);
             let productosData = response.data;
             
-            if (categoria && categoria !== 'todas') {
+            const esTodas = categoria === 'todas';
+            if (!esTodas) {
                 productosData = productosData.filter(p => p.categoria === categoria);
             }
             
             setProductos(productosData);
             setProductosFiltrados(productosData);
+            
+            // Determinar columnas visibles
+            const columnas = determinarColumnasVisibles(productosData, esTodas);
+            setColumnasVisibles(columnas);
+            
             setModoEdicion(false);
             setModoEliminar(false);
             setProductosEditados({});
@@ -106,7 +177,9 @@ function Inventario() {
             filtrados = filtrados.filter(p => 
                 (p.producto && p.producto.toLowerCase().includes(busqueda.toLowerCase())) ||
                 (p.codigo && p.codigo.toLowerCase().includes(busqueda.toLowerCase())) ||
-                (p.contenido && p.contenido.toLowerCase().includes(busqueda.toLowerCase()))
+                (p.contenido && p.contenido.toLowerCase().includes(busqueda.toLowerCase())) ||
+                (p.vehiculo && p.vehiculo.toLowerCase().includes(busqueda.toLowerCase())) ||
+                (p.detalle && p.detalle.toLowerCase().includes(busqueda.toLowerCase()))
             );
         }
         setProductosFiltrados(filtrados);
@@ -128,7 +201,11 @@ function Inventario() {
                 contenido: '',
                 precio: 0,
                 stock: 0,
-                codigo: ''
+                codigo: '',
+                vehiculo: '',
+                detalle: '',
+                precio_contado: 0,
+                precio_colocado: 0
             });
         
             await cargarCategorias();
@@ -264,7 +341,6 @@ function Inventario() {
 
     const productosStockBajo = productos.filter(p => (p.stock || 0) <= 0);
 
-    // Determinar qué mostrar en el footer
     const getFooterInfo = () => {
         let info = `Total: ${productosFiltrados.length} productos`;
         if (modoEdicion) {
@@ -274,6 +350,22 @@ function Inventario() {
             info += ` | Seleccionados: ${productosSeleccionados.length} productos`;
         }
         return info;
+    };
+
+    // Obtener el número de columnas para el colspan
+    const getTotalColumnas = () => {
+        let count = 0;
+        if (columnasVisibles.mostrarCodigo) count++;
+        if (columnasVisibles.mostrarCategoria) count++;
+        if (columnasVisibles.mostrarProducto) count++;
+        if (columnasVisibles.mostrarVehiculo) count++;
+        if (columnasVisibles.mostrarDetalle) count++;
+        if (columnasVisibles.mostrarContenido) count++;
+        if (columnasVisibles.mostrarPrecioContado) count++;
+        if (columnasVisibles.mostrarPrecio) count++;
+        if (columnasVisibles.mostrarPrecioColocado) count++;
+        if (modoEliminar && esAdmin) count++;
+        return count;
     };
 
     return (
@@ -289,6 +381,9 @@ function Inventario() {
                         >
                             <option value="">
                                 ─ Seleccionar ─
+                            </option>
+                            <option value="todas">
+                                📦 Todas las categorías
                             </option>
                             {categorias.map(cat => (
                                 <option key={cat} value={cat}>
@@ -352,12 +447,47 @@ function Inventario() {
                                     required
                                 />
                             </div>
+
+                            <div className="form-input-wrapper">
+                                <FaCar className="input-icon" />
+                                <input type="text" placeholder="Vehículo" className="inventario-valvic-form-input"
+                                    value={nuevoProducto.vehiculo || ''}
+                                    onChange={(e) => setNuevoProducto({...nuevoProducto, vehiculo: e.target.value})}
+                                />
+                            </div>
+
+                            <div className="form-input-wrapper">
+                                <FaInfoCircle className="input-icon" />
+                                <input type="text" placeholder="Detalle" className="inventario-valvic-form-input"
+                                    value={nuevoProducto.detalle || ''}
+                                    onChange={(e) => setNuevoProducto({...nuevoProducto, detalle: e.target.value})}
+                                />
+                            </div>
                     
                             <div className="form-input-wrapper">
                                 <FiPackage className="input-icon" />
                                 <input type="text" placeholder="Contenido (ej: 205/55R16)"
                                     className="inventario-valvic-form-input" value={nuevoProducto.contenido || ''}
                                     onChange={(e) => setNuevoProducto({...nuevoProducto, contenido: e.target.value})}
+                                />
+                            </div>
+
+                            <div className="form-input-wrapper">
+                                <FaMoneyBill className="input-icon" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Precio Contado"
+                                    className="inventario-valvic-form-input" 
+                                    value={nuevoProducto.precio_contado || ''}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                            setNuevoProducto({
+                                                ...nuevoProducto, 
+                                                precio_contado: value === '' ? 0 : parseFloat(value) || 0
+                                            });
+                                        }
+                                    }}
                                 />
                             </div>
                     
@@ -374,6 +504,25 @@ function Inventario() {
                                             setNuevoProducto({
                                                 ...nuevoProducto, 
                                                 precio: value === '' ? 0 : parseFloat(value) || 0
+                                            });
+                                        }
+                                    }}
+                                />
+                            </div>
+
+                            <div className="form-input-wrapper">
+                                <FaMoneyBill className="input-icon" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Precio Colocado"
+                                    className="inventario-valvic-form-input" 
+                                    value={nuevoProducto.precio_colocado || ''}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                            setNuevoProducto({
+                                                ...nuevoProducto, 
+                                                precio_colocado: value === '' ? 0 : parseFloat(value) || 0
                                             });
                                         }
                                     }}
@@ -453,6 +602,41 @@ function Inventario() {
                                             <FaTrashAlt className="btn-icon" /> Eliminar Productos
                                         </button>
                                     )}
+                                    {/* Indicador de columnas ocultas */}
+                                    {categoriaSeleccionada && categoriaSeleccionada !== 'todas' && (
+                                        <div className="columnas-info">
+                                            {!columnasVisibles.mostrarCodigo && (
+                                                <span className="columna-oculta" title="Esta categoría no tiene productos con código">
+                                                    ⚡ Sin código
+                                                </span>
+                                            )}
+                                            {!columnasVisibles.mostrarVehiculo && (
+                                                <span className="columna-oculta" title="Esta categoría no tiene productos con vehículo">
+                                                    ⚡ Sin vehículo
+                                                </span>
+                                            )}
+                                            {!columnasVisibles.mostrarDetalle && (
+                                                <span className="columna-oculta" title="Esta categoría no tiene productos con detalle">
+                                                    ⚡ Sin detalle
+                                                </span>
+                                            )}
+                                            {!columnasVisibles.mostrarContenido && (
+                                                <span className="columna-oculta" title="Esta categoría no tiene productos con contenido">
+                                                    ⚡ Sin contenido
+                                                </span>
+                                            )}
+                                            {!columnasVisibles.mostrarPrecioContado && (
+                                                <span className="columna-oculta" title="Esta categoría no tiene productos con precio contado">
+                                                    ⚡ Sin precio contado
+                                                </span>
+                                            )}
+                                            {!columnasVisibles.mostrarPrecioColocado && (
+                                                <span className="columna-oculta" title="Esta categoría no tiene productos con precio colocado">
+                                                    ⚡ Sin precio colocado
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                 </>
                             ) : modoEdicion ? (
                                 <>
@@ -530,18 +714,40 @@ function Inventario() {
                                             />
                                         </th>
                                     )}
-                                    <th><FaBarcode className="th-icon" /> Código</th>
-                                    <th><MdCategory className="th-icon" /> Categoría</th>
-                                    <th><FaTags className="th-icon" /> Producto</th>
-                                    <th><FiGrid className="th-icon" /> Contenido</th>
+                                    {columnasVisibles.mostrarCodigo && (
+                                        <th><FaBarcode className="th-icon" /> Código</th>
+                                    )}
+                                    {columnasVisibles.mostrarCategoria && (
+                                        <th><MdCategory className="th-icon" /> Categoría</th>
+                                    )}
+                                    {columnasVisibles.mostrarProducto && (
+                                        <th><FaTags className="th-icon" /> Producto</th>
+                                    )}
+                                    {columnasVisibles.mostrarVehiculo && (
+                                        <th><FaCar className="th-icon" /> Vehículo</th>
+                                    )}
+                                    {columnasVisibles.mostrarDetalle && (
+                                        <th><FaInfoCircle className="th-icon" /> Detalle</th>
+                                    )}
+                                    {columnasVisibles.mostrarContenido && (
+                                        <th><FiGrid className="th-icon" /> Contenido</th>
+                                    )}
+                                    {columnasVisibles.mostrarPrecioContado && (
+                                        <th><FaMoneyBill className="th-icon" /> Precio Contado</th>
+                                    )}
+                                    {columnasVisibles.mostrarPrecio && (
+                                        <th><FaDollarSign className="th-icon" /> Precio</th>
+                                    )}
+                                    {columnasVisibles.mostrarPrecioColocado && (
+                                        <th><FaMoneyBill className="th-icon" /> Precio Colocado</th>
+                                    )}
                                     <th><MdInventory className="th-icon" /> Stock</th>
-                                    <th><FaDollarSign className="th-icon" /> Precio</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {productosFiltrados.length === 0 ? (
                                     <tr>
-                                        <td colSpan={modoEliminar && esAdmin ? 7 : 6} className="inventario-valvic-empty">
+                                        <td colSpan={getTotalColumnas() + 1} className="inventario-valvic-empty">
                                             <FaBox className="empty-icon" /> No hay productos en esta categoría
                                         </td>
                                     </tr>
@@ -560,66 +766,198 @@ function Inventario() {
                                                         />
                                                     </td>
                                                 )}
-                                                <td><code>{producto.codigo || '—'}</code></td>
-                                                <td>{producto.categoria || '—'}</td>
+                                                {columnasVisibles.mostrarCodigo && (
+                                                    <td>
+                                                        {modoEdicion ? (
+                                                            <input 
+                                                                type="text"
+                                                                className="inventario-valvic-edit-input"
+                                                                value={datosProducto.codigo || ''}
+                                                                onChange={(e) => handleEditChange(producto.id, 'codigo', e.target.value)}
+                                                            />
+                                                        ) : (
+                                                            <code>{producto.codigo || '—'}</code>
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {columnasVisibles.mostrarCategoria && (
+                                                    <td>
+                                                        {modoEdicion ? (
+                                                            <input 
+                                                                type="text"
+                                                                className="inventario-valvic-edit-input"
+                                                                value={datosProducto.categoria || ''}
+                                                                onChange={(e) => handleEditChange(producto.id, 'categoria', e.target.value)}
+                                                            />
+                                                        ) : (
+                                                            producto.categoria || '—'
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {columnasVisibles.mostrarProducto && (
+                                                    <td>
+                                                        {modoEdicion ? (
+                                                            <input 
+                                                                type="text"
+                                                                className="inventario-valvic-edit-input"
+                                                                value={datosProducto.producto || ''}
+                                                                onChange={(e) => handleEditChange(producto.id, 'producto', e.target.value)}
+                                                            />
+                                                        ) : (
+                                                            <strong>{producto.producto}</strong>
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {columnasVisibles.mostrarVehiculo && (
+                                                    <td>
+                                                        {modoEdicion ? (
+                                                            <input 
+                                                                type="text"
+                                                                className="inventario-valvic-edit-input"
+                                                                value={datosProducto.vehiculo || ''}
+                                                                onChange={(e) => handleEditChange(producto.id, 'vehiculo', e.target.value)}
+                                                            />
+                                                        ) : (
+                                                            producto.vehiculo || '—'
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {columnasVisibles.mostrarDetalle && (
+                                                    <td>
+                                                        {modoEdicion ? (
+                                                            <input 
+                                                                type="text"
+                                                                className="inventario-valvic-edit-input"
+                                                                value={datosProducto.detalle || ''}
+                                                                onChange={(e) => handleEditChange(producto.id, 'detalle', e.target.value)}
+                                                            />
+                                                        ) : (
+                                                            producto.detalle || '—'
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {columnasVisibles.mostrarContenido && (
+                                                    <td>
+                                                        {modoEdicion ? (
+                                                            <input 
+                                                                type="text"
+                                                                className="inventario-valvic-edit-input"
+                                                                value={datosProducto.contenido || ''}
+                                                                onChange={(e) => handleEditChange(producto.id, 'contenido', e.target.value)}
+                                                            />
+                                                        ) : (
+                                                            producto.contenido || '—'
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {columnasVisibles.mostrarPrecioContado && (
+                                                    <td>
+                                                        {modoEdicion ? (
+                                                            <input 
+                                                                type="text"
+                                                                className="inventario-valvic-edit-input"
+                                                                value={datosProducto.precio_contado || ''}
+                                                                onChange={(e) => {
+                                                                    const value = e.target.value;
+                                                                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                                                        handleEditChange(producto.id, 'precio_contado', value === '' ? 0 : parseFloat(value) || 0);
+                                                                    }
+                                                                }}
+                                                                placeholder="0.00"
+                                                            />
+                                                        ) : (
+                                                            (producto.precio_contado || 0) > 0 ? '$' + (producto.precio_contado || 0).toLocaleString() : '—'
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {columnasVisibles.mostrarPrecio && (
+                                                    <td>
+                                                        {modoEdicion ? (
+                                                            <input 
+                                                                type="text"
+                                                                className="inventario-valvic-edit-input precio-input"
+                                                                value={datosProducto.precio || ''}
+                                                                onChange={(e) => {
+                                                                    const value = e.target.value;
+                                                                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                                                        handleEditChange(producto.id, 'precio', value === '' ? 0 : parseFloat(value) || 0);
+                                                                    }
+                                                                }}
+                                                                placeholder="0.00"
+                                                            />
+                                                        ) : (
+                                                            '$' + (producto.precio || 0).toLocaleString()
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {columnasVisibles.mostrarPrecioColocado && (
+                                                    <td>
+                                                        {modoEdicion ? (
+                                                            <input 
+                                                                type="text"
+                                                                className="inventario-valvic-edit-input"
+                                                                value={datosProducto.precio_colocado || ''}
+                                                                onChange={(e) => {
+                                                                    const value = e.target.value;
+                                                                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                                                        handleEditChange(producto.id, 'precio_colocado', value === '' ? 0 : parseFloat(value) || 0);
+                                                                    }
+                                                                }}
+                                                                placeholder="0.00"
+                                                            />
+                                                        ) : (
+                                                            (producto.precio_colocado || 0) > 0 ? '$' + (producto.precio_colocado || 0).toLocaleString() : '—'
+                                                        )}
+                                                    </td>
+                                                )}
                                                 <td>
                                                     {modoEdicion ? (
-                                                        <input 
-                                                            type="text"
-                                                            className="inventario-valvic-edit-input"
-                                                            value={datosProducto.producto || ''}
-                                                            onChange={(e) => handleEditChange(producto.id, 'producto', e.target.value)}
-                                                        />
-                                                    ) : (
-                                                        <strong>{producto.producto}</strong>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {modoEdicion ? (
-                                                        <input 
-                                                            type="text"
-                                                            className="inventario-valvic-edit-input"
-                                                            value={datosProducto.contenido || ''}
-                                                            onChange={(e) => handleEditChange(producto.id, 'contenido', e.target.value)}
-                                                        />
-                                                    ) : (
-                                                        producto.contenido || '—'
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {modoEdicion ? (
-                                                        <input 
-                                                            type="text"
-                                                            className="inventario-valvic-edit-input"
-                                                            value={datosProducto.stock || ''}
-                                                            onChange={(e) => {
-                                                                const value = e.target.value;
-                                                                if (value === '' || /^\d*$/.test(value)) {
-                                                                    handleEditChange(producto.id, 'stock', value === '' ? 0 : parseInt(value) || 0);
-                                                                }
-                                                            }}
-                                                        />
+                                                        <div className="stock-editor-wrapper">
+                                                            <button 
+                                                                type="button"
+                                                                className="stock-btn stock-btn-minus"
+                                                                onClick={() => {
+                                                                    const currentValue = datosProducto.stock || 0;
+                                                                    const newValue = Math.max(0, currentValue - 1);
+                                                                    handleEditChange(producto.id, 'stock', newValue);
+                                                                }}
+                                                            >
+                                                                −
+                                                            </button>
+                                                            <input 
+                                                                type="number"
+                                                                className="inventario-valvic-edit-input stock-input"
+                                                                value={datosProducto.stock || ''}
+                                                                onChange={(e) => {
+                                                                    const value = e.target.value;
+                                                                    if (value === '') {
+                                                                        handleEditChange(producto.id, 'stock', 0);
+                                                                    } else {
+                                                                        const numValue = parseInt(value);
+                                                                        if (!isNaN(numValue) && numValue >= 0) {
+                                                                            handleEditChange(producto.id, 'stock', numValue);
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                min="0"
+                                                                step="1"
+                                                            />
+                                                            <button 
+                                                                type="button"
+                                                                className="stock-btn stock-btn-plus"
+                                                                onClick={() => {
+                                                                    const currentValue = datosProducto.stock || 0;
+                                                                    const newValue = currentValue + 1;
+                                                                    handleEditChange(producto.id, 'stock', newValue);
+                                                                }}
+                                                            >
+                                                                +
+                                                            </button>
+                                                        </div>
                                                     ) : (
                                                         <span className={`inventario-valvic-badge ${(producto.stock || 0) <= 0 ? 'badge-danger' : 'badge-success'}`}>
                                                             {producto.stock || 0}
                                                         </span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {modoEdicion ? (
-                                                        <input 
-                                                            type="text"
-                                                            className="inventario-valvic-edit-input"
-                                                            value={datosProducto.precio || ''}
-                                                            onChange={(e) => {
-                                                                const value = e.target.value;
-                                                                if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                                                                    handleEditChange(producto.id, 'precio', value === '' ? 0 : parseFloat(value) || 0);
-                                                                }
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        '$' + (producto.precio || 0).toLocaleString()
                                                     )}
                                                 </td>
                                             </tr>
