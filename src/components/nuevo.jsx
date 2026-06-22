@@ -3,7 +3,7 @@ import axios from 'axios';
 import { 
     FaPlus, FaFolderPlus, FaTags, FaDollarSign, FaBarcode, 
     FaSave, FaTimes, FaBox, FaList, FaFolderOpen, FaEdit, FaTrashAlt,
-    FaCar, FaInfoCircle, FaMoneyBill
+    FaCar, FaInfoCircle, FaMoneyBill, FaSpinner
 } from 'react-icons/fa';
 import { MdCategory, MdInventory } from 'react-icons/md';
 import { FiPackage } from 'react-icons/fi';
@@ -22,6 +22,11 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
     const [loadingEliminar, setLoadingEliminar] = useState(false);
     const [mensajeTemporal, setMensajeTemporal] = useState(null);
     
+    const [codigoExistente, setCodigoExistente] = useState(false);
+    const [codigoVerificado, setCodigoVerificado] = useState(false);
+    const [verificandoCodigo, setVerificandoCodigo] = useState(false);
+    const [codigoTimer, setCodigoTimer] = useState(null);
+
     const [nuevaCategoria, setNuevaCategoria] = useState({ nombre: '' });
     const [categoriaEditando, setCategoriaEditando] = useState(null);
 
@@ -223,6 +228,40 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
             setCargando(false);
         }
     };
+
+    const verificarCodigo = async (codigo) => {
+        if (!codigo || codigo.trim() === '') {
+            setCodigoExistente(false);
+            setCodigoVerificado(false);
+            return;
+        }
+
+        setVerificandoCodigo(true);
+        try {
+            // Obtener todos los productos y verificar si el código existe
+            const response = await axios.get(`${API_URL}/productos`);
+            const existe = response.data.some(p => 
+                p.codigo && p.codigo.trim().toUpperCase() === codigo.trim().toUpperCase()
+            );
+            setCodigoExistente(existe);
+            setCodigoVerificado(true);
+        } catch (error) {
+            console.error('Error al verificar código:', error);
+            setCodigoExistente(false);
+            setCodigoVerificado(false);
+        } finally {
+            setVerificandoCodigo(false);
+        }
+    };
+
+    // Limpiar timer al desmontar
+    useEffect(() => {
+        return () => {
+            if (codigoTimer) {
+                clearTimeout(codigoTimer);
+            }
+        };
+    }, [codigoTimer]);
 
     return (
         <div className="nuevo-valvic-container">
@@ -436,13 +475,48 @@ function Nuevo({ onProductoCreado, onCategoriaCreada }) {
                                             ¿Tiene código?
                                         </label>
                                         {nuevoProducto.tieneCodigo && (
-                                            <input
-                                                type="text"
-                                                className="form-input"
-                                                placeholder="Código del producto"
-                                                value={nuevoProducto.codigo}
-                                                onChange={(e) => setNuevoProducto({ ...nuevoProducto, codigo: e.target.value })}
-                                            />
+                                            <div className="codigo-input-wrapper">
+                                                <input
+                                                    type="text"
+                                                    className={`form-input ${codigoExistente ? 'input-error' : ''}`}
+                                                    placeholder="Código del producto"
+                                                    value={nuevoProducto.codigo}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value;
+                                                        setNuevoProducto({ ...nuevoProducto, codigo: value });
+                                                        
+                                                        if (codigoTimer) {
+                                                            clearTimeout(codigoTimer);
+                                                        }
+                                                        
+                                                        const timer = setTimeout(() => {
+                                                            if (value.trim() !== '') {
+                                                                verificarCodigo(value);
+                                                            } else {
+                                                                setCodigoExistente(false);
+                                                                setCodigoVerificado(false);
+                                                            }
+                                                        }, 500);
+                                                        
+                                                        setCodigoTimer(timer);
+                                                    }}
+                                                    onBlur={() => {
+                                                        if (nuevoProducto.codigo && nuevoProducto.codigo.trim() !== '') {
+                                                            verificarCodigo(nuevoProducto.codigo);
+                                                        }
+                                                    }}
+                                                />
+                                                {verificandoCodigo && (
+                                                    <span className="codigo-verificando">
+                                                        <FaSpinner className="spinning" />
+                                                    </span>
+                                                )}
+                                                {codigoVerificado && !verificandoCodigo && (
+                                                    <span className={`codigo-alerta ${codigoExistente ? 'alerta-error' : 'alerta-exito'}`}>
+                                                        {codigoExistente ? '⚠️ Código ya existe' : '✅ Código disponible'}
+                                                    </span>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
 

@@ -354,6 +354,51 @@
     color: #666;
 }
 
+/********** VALIDACIÓN DE CÓDIGO **********/
+.codigo-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.codigo-input-wrapper .form-input {
+    flex: 1;
+}
+
+.codigo-input-wrapper .form-input.input-error {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+}
+
+.codigo-verificando {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    color: #888;
+}
+
+.codigo-verificando .spinning {
+    animation: spin 1s linear infinite;
+}
+
+.codigo-alerta {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 140px;
+}
+
+.codigo-alerta.alerta-error {
+    color: #ff6b6b;
+}
+
+.codigo-alerta.alerta-exito {
+    color: #4CAF50;
+}
+
+
 /********** RESPONSIVE **********/
 @media (max-width: 768px) {
     .nuevo-valvic-grid {
