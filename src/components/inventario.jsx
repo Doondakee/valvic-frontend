@@ -5,7 +5,7 @@ import logoValvic from '../assets/valvic.png';
 // ICONOS
 import { FaSearch, FaEdit, FaTrashAlt, FaBox, FaTags, FaDollarSign, FaBarcode, FaSave, FaTimes, FaFolderOpen,
     FaFolder, FaFolderPlus, FaStore, FaList, FaClipboardCheck, FaExclamationTriangle, FaPlus, FaDatabase,
-    FaCheck, FaCheckDouble, FaCar, FaInfoCircle, FaMoneyBill
+    FaCheck, FaCheckDouble, FaCar, FaInfoCircle, FaMoneyBill, FaSpinner
 } from 'react-icons/fa';
 
 import { MdCategory, MdInventory, MdProductionQuantityLimits, MdDashboard, MdOutlineCategory, MdFolder, 
@@ -36,6 +36,9 @@ function Inventario() {
     
     // Estado para mensaje temporal
     const [mensajeTemporal, setMensajeTemporal] = useState(null);
+    
+    // Estado para progreso de guardado
+    const [progresoGuardado, setProgresoGuardado] = useState({ mostrar: false, actual: 0, total: 0 });
 
     // Estado para columnas visibles
     const [columnasVisibles, setColumnasVisibles] = useState({
@@ -65,6 +68,10 @@ function Inventario() {
 
     const rol = localStorage.getItem('rol');
     const esAdmin = rol === 'administrador';
+
+    // Stock bajo para alertas
+    const productosStockBajo = productos.filter(p => (p.stock || 0) <= 0);
+    const productosStockCritico = productos.filter(p => (p.stock || 0) >= 1 && (p.stock || 0) <= 3);
 
     const estaVacio = (valor) => {
         return valor === null || valor === undefined || valor === '';
@@ -149,7 +156,6 @@ function Inventario() {
                 }));
             }
 
-            // Solo mensaje temporal sin confirmación
             setMensajeTemporal({ 
                 tipo: 'success', 
                 texto: `📦 Descontado 1 a "${producto.producto}"` 
@@ -296,29 +302,110 @@ function Inventario() {
     const cancelarModoEdicion = () => {
         setModoEdicion(false);
         setProductosEditados({});
+        setProgresoGuardado({ mostrar: false, actual: 0, total: 0 });
     };
 
+    // ✅ OPTIMIZACIÓN: Guardar cambios en lote (BATCH)
     const guardarCambiosEdicion = async () => {
+        const idsModificados = Object.keys(productosEditados);
+        
+        if (idsModificados.length === 0) {
+            setMensajeTemporal({ tipo: 'error', texto: 'No hay cambios para guardar' });
+            setTimeout(() => setMensajeTemporal(null), 3000);
+            return;
+        }
+
+        // Mostrar progreso
+        setProgresoGuardado({ mostrar: true, actual: 0, total: idsModificados.length });
+        setMensajeTemporal({ 
+            tipo: 'info', 
+            texto: `⏳ Preparando ${idsModificados.length} productos para guardar...` 
+        });
+
         try {
             setCargando(true);
-            const idsModificados = Object.keys(productosEditados);
             
-            for (const id of idsModificados) {
-                const producto = productosEditados[id];
-                await axios.put(`${API_URL}/productos/${id}`, producto);
-            }
-            
+            // Preparar array de productos a actualizar
+            const productosAActualizar = idsModificados.map(id => ({
+                id: parseInt(id),
+                ...productosEditados[id]
+            }));
+
+            // Actualizar progreso
+            setProgresoGuardado(prev => ({ ...prev, actual: Math.min(prev.actual + 1, prev.total) }));
+            setMensajeTemporal({ 
+                tipo: 'info', 
+                texto: `⏳ Guardando ${idsModificados.length} productos...` 
+            });
+
+            // Enviar todos en una sola request
+            const response = await axios.put(`${API_URL}/productos/batch`, {
+                productos: productosAActualizar
+            });
+
+            setProgresoGuardado(prev => ({ ...prev, actual: prev.total }));
+
+            // Recargar productos
             await cargarProductosPorCategoria(categoriaSeleccionada);
             setModoEdicion(false);
             setProductosEditados({});
-            setMensajeTemporal({ tipo: 'success', texto: '✅ Cambios guardados exitosamente' });
-            setTimeout(() => setMensajeTemporal(null), 3000);
+            
+            const mensajeExito = response.data?.message || 'Cambios guardados exitosamente';
+            setMensajeTemporal({ 
+                tipo: 'success', 
+                texto: `✅ ${mensajeExito}` 
+            });
+            setTimeout(() => setMensajeTemporal(null), 4000);
+            
         } catch (error) {
             console.error('Error al guardar cambios:', error);
-            setMensajeTemporal({ tipo: 'error', texto: '❌ Error al guardar los cambios' });
-            setTimeout(() => setMensajeTemporal(null), 3000);
+            
+            // Intentar guardar uno por uno si falla el batch
+            if (idsModificados.length > 10) {
+                setMensajeTemporal({ 
+                    tipo: 'warning', 
+                    texto: '⚠️ El lote falló, intentando guardar individualmente...' 
+                });
+                
+                // Guardar uno por uno como fallback
+                let exitos = 0;
+                let errores = 0;
+                
+                for (let i = 0; i < idsModificados.length; i++) {
+                    const id = idsModificados[i];
+                    try {
+                        await axios.put(`${API_URL}/productos/${id}`, productosEditados[id]);
+                        exitos++;
+                        setProgresoGuardado({ mostrar: true, actual: exitos, total: idsModificados.length });
+                    } catch (e) {
+                        errores++;
+                        console.error(`Error guardando producto ${id}:`, e);
+                    }
+                }
+                
+                await cargarProductosPorCategoria(categoriaSeleccionada);
+                setModoEdicion(false);
+                setProductosEditados({});
+                
+                setMensajeTemporal({ 
+                    tipo: errores === 0 ? 'success' : 'warning',
+                    texto: errores === 0 
+                        ? `✅ ${exitos} productos guardados exitosamente` 
+                        : `⚠️ ${exitos} guardados, ${errores} con errores`
+                });
+                setTimeout(() => setMensajeTemporal(null), 4000);
+            } else {
+                setMensajeTemporal({ 
+                    tipo: 'error', 
+                    texto: '❌ Error al guardar los cambios' 
+                });
+                setTimeout(() => setMensajeTemporal(null), 5000);
+            }
         } finally {
             setCargando(false);
+            setTimeout(() => {
+                setProgresoGuardado({ mostrar: false, actual: 0, total: 0 });
+            }, 2000);
         }
     };
 
@@ -401,8 +488,6 @@ function Inventario() {
         setMostrarFormulario(true);
     };
 
-    const productosStockBajo = productos.filter(p => (p.stock || 0) <= 0);
-
     const getFooterInfo = () => {
         let info = `Total: ${productosFiltrados.length} productos`;
         if (modoEdicion) {
@@ -429,7 +514,6 @@ function Inventario() {
         return count;
     };
 
-    // Función para obtener la clase del badge según el stock
     const getStockBadgeClass = (stock) => {
         const stockValue = stock || 0;
         if (stockValue === 0) return 'badge-danger';
@@ -437,7 +521,6 @@ function Inventario() {
         return 'badge-success';
     };
 
-    // Función para obtener la clase de la fila según el stock
     const getRowClass = (stock) => {
         const stockValue = stock || 0;
         if (stockValue === 0) return 'inventario-valvic-row-stock-cero';
@@ -486,10 +569,36 @@ function Inventario() {
                 </div>
             )}
 
-            {productosStockBajo.length > 0 && (
-                <div className="inventario-valvic-alert">
-                    <FaExclamationTriangle className="inventario-valvic-alert-icon" />
-                    Hay {productosStockBajo.length} productos con stock agotado
+            {/* Barra de progreso para guardado en lote */}
+            {progresoGuardado.mostrar && (
+                <div className="inventario-valvic-progress">
+                    <div className="progress-bar">
+                        <div 
+                            className="progress-fill" 
+                            style={{ width: `${(progresoGuardado.actual / progresoGuardado.total) * 100}%` }}
+                        />
+                    </div>
+                    <span className="progress-text">
+                        {progresoGuardado.actual} / {progresoGuardado.total} productos
+                    </span>
+                </div>
+            )}
+
+            {/* Alertas de stock */}
+            {(productosStockBajo.length > 0 || productosStockCritico.length > 0) && (
+                <div className="inventario-valvic-alerts-container">
+                    {productosStockBajo.length > 0 && (
+                        <div className="inventario-valvic-alert inventario-valvic-alert-danger">
+                            <FaExclamationTriangle className="inventario-valvic-alert-icon" />
+                            <span>Hay <strong>{productosStockBajo.length}</strong> productos con stock <strong>agotado</strong></span>
+                        </div>
+                    )}
+                    {productosStockCritico.length > 0 && (
+                        <div className="inventario-valvic-alert inventario-valvic-alert-warning">
+                            <FaExclamationTriangle className="inventario-valvic-alert-icon" />
+                            <span>Hay <strong>{productosStockCritico.length}</strong> productos con <strong>poco stock</strong> (1-3 unidades)</span>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -743,12 +852,15 @@ function Inventario() {
                                         <button 
                                             className="inventario-valvic-btn-success"
                                             onClick={guardarCambiosEdicion}
+                                            disabled={cargando}
                                         >
-                                            <FaSave className="btn-icon" /> Guardar Cambios
+                                            <FaSave className="btn-icon" /> 
+                                            {cargando ? 'Guardando...' : 'Guardar Cambios'}
                                         </button>
                                         <button 
                                             className="inventario-valvic-btn-secondary"
                                             onClick={cancelarModoEdicion}
+                                            disabled={cargando}
                                         >
                                             <FaTimes className="btn-icon" /> Cancelar Edición
                                         </button>
@@ -859,7 +971,7 @@ function Inventario() {
                                         return (
                                             <tr 
                                                 key={producto.id} 
-                                                className={`${!modoEdicion ? getRowClass(producto.stock) : ''} ${(producto.stock || 0) <= 0 && !modoEdicion ? 'inventario-valvic-row-stock-cero' : ''}`}
+                                                className={`${!modoEdicion ? getRowClass(producto.stock) : ''}`}
                                             >
                                                 {modoEliminar && esAdmin && (
                                                     <td>
@@ -1096,12 +1208,9 @@ function Inventario() {
                 </div>
             )}
 
-            {/* Modal de Confirmación para Eliminar */}
             <ModalConfirmacion 
                 isOpen={modalConfirmacionOpen}
-                onClose={() => {
-                    setModalConfirmacionOpen(false);
-                }}
+                onClose={() => setModalConfirmacionOpen(false)}
                 onConfirm={eliminarProductosSeleccionados}
                 productos={productosFiltrados.filter(p => productosSeleccionados.includes(p.id))}
                 categoria={`${productosSeleccionados.length} productos`}
