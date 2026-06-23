@@ -21,6 +21,7 @@ function Inventario() {
     const [productos, setProductos] = useState([]);
     const [productosFiltrados, setProductosFiltrados] = useState([]);
     const [categorias, setCategorias] = useState([]);
+    const [categoriasCompletas, setCategoriasCompletas] = useState([]);
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('');
     const [busqueda, setBusqueda] = useState('');
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
@@ -52,6 +53,10 @@ function Inventario() {
         mostrarPrecio: true,
         mostrarPrecioColocado: true
     });
+
+    // ✅ Estados para filtros de stock
+    const [filtrarStockCero, setFiltrarStockCero] = useState(false);
+    const [filtrarStockBajo, setFiltrarStockBajo] = useState(false);
 
     const [nuevoProducto, setNuevoProducto] = useState({
         categoria: '',
@@ -119,6 +124,21 @@ function Inventario() {
         };
     };
 
+    // ✅ Función para aplicar filtros de stock
+    const aplicarFiltrosStock = (productosLista) => {
+        let resultado = [...productosLista];
+        
+        if (filtrarStockCero) {
+            resultado = resultado.filter(p => (p.stock || 0) === 0);
+        }
+        
+        if (filtrarStockBajo) {
+            resultado = resultado.filter(p => (p.stock || 0) >= 1 && (p.stock || 0) <= 3);
+        }
+        
+        return resultado;
+    };
+
     // Función para descontar stock directamente (sin confirmación)
     const descontarStockDirecto = async (producto) => {
         if (producto.stock <= 0) {
@@ -180,6 +200,15 @@ function Inventario() {
         }
     };
 
+    const cargarCategoriasCompletas = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/categorias/completo`);
+            setCategoriasCompletas(response.data);
+        } catch (error) {
+            console.error('Error al cargar categorías completas:', error);
+        }
+    };
+
     const cargarProductosPorCategoria = async (categoria) => {
         if (!categoria) return;
         
@@ -190,11 +219,21 @@ function Inventario() {
             
             const esTodas = categoria === 'todas';
             if (!esTodas) {
-                productosData = productosData.filter(p => p.categoria === categoria);
+                const categoriaEncontrada = categoriasCompletas.find(c => c.categoria === categoria);
+                
+                if (categoriaEncontrada) {
+                    productosData = productosData.filter(p => p.id_categoria === categoriaEncontrada.id_categoria);
+                } else {
+                    console.warn(`⚠️ Categoría "${categoria}" no encontrada en categoriasCompletas, filtrando por nombre`);
+                    productosData = productosData.filter(p => p.categoria === categoria);
+                }
             }
             
             setProductos(productosData);
-            setProductosFiltrados(productosData);
+            
+            // ✅ Aplicar filtros de stock a los productos cargados
+            const productosConFiltros = aplicarFiltrosStock(productosData);
+            setProductosFiltrados(productosConFiltros);
             
             const columnas = determinarColumnasVisibles(productosData, esTodas);
             setColumnasVisibles(columnas);
@@ -214,6 +253,9 @@ function Inventario() {
         const categoria = e.target.value;
         setCategoriaSeleccionada(categoria);
         setBusqueda('');
+        // Resetear filtros al cambiar de categoría
+        setFiltrarStockCero(false);
+        setFiltrarStockBajo(false);
         if (categoria) {
             await cargarProductosPorCategoria(categoria);
         } else {
@@ -224,6 +266,7 @@ function Inventario() {
 
     useEffect(() => {
         cargarCategorias();
+        cargarCategoriasCompletas();
     }, []);
 
     useEffect(() => {
@@ -238,9 +281,9 @@ function Inventario() {
                 if (!texto) return false;
                 const textoLower = texto.toLowerCase();
                 return textoLower === termino || 
-                       textoLower.startsWith(termino + ' ') || 
-                       textoLower.endsWith(' ' + termino) || 
-                       textoLower.includes(' ' + termino + ' ');
+                    textoLower.startsWith(termino + ' ') || 
+                    textoLower.endsWith(' ' + termino) || 
+                    textoLower.includes(' ' + termino + ' ');
             };
 
             filtrados = filtrados.filter(p => 
@@ -251,8 +294,23 @@ function Inventario() {
                 contienePalabraExacta(p.detalle, terminoBusqueda)
             );
         }
+        
+        // ✅ Aplicar filtros de stock
+        filtrados = aplicarFiltrosStock(filtrados);
+        
         setProductosFiltrados(filtrados);
-    }, [busqueda, productos]);
+        
+        // ✅ Si estamos en modo edición, actualizar productosEditados solo con los productos filtrados
+        if (modoEdicion) {
+            const nuevosEditados = {};
+            filtrados.forEach(p => {
+                // Si el producto ya estaba en productosEditados, mantener sus cambios
+                // Si no, tomar los datos originales
+                nuevosEditados[p.id] = productosEditados[p.id] || { ...p };
+            });
+            setProductosEditados(nuevosEditados);
+        }
+    }, [busqueda, productos, filtrarStockCero, filtrarStockBajo, modoEdicion]);
 
     const guardarProducto = async (e) => {
         e.preventDefault();
@@ -278,6 +336,7 @@ function Inventario() {
             });
         
             await cargarCategorias();
+            await cargarCategoriasCompletas();
             await cargarProductosPorCategoria(categoriaSeleccionada);
             setMensajeTemporal({ tipo: 'success', texto: '✅ Producto guardado exitosamente' });
             setTimeout(() => setMensajeTemporal(null), 3000);
@@ -305,7 +364,6 @@ function Inventario() {
         setProgresoGuardado({ mostrar: false, actual: 0, total: 0 });
     };
 
-    // ✅ OPTIMIZACIÓN: Guardar cambios en lote (BATCH)
     const guardarCambiosEdicion = async () => {
         const idsModificados = Object.keys(productosEditados);
         
@@ -315,7 +373,6 @@ function Inventario() {
             return;
         }
 
-        // Mostrar progreso
         setProgresoGuardado({ mostrar: true, actual: 0, total: idsModificados.length });
         setMensajeTemporal({ 
             tipo: 'info', 
@@ -325,27 +382,23 @@ function Inventario() {
         try {
             setCargando(true);
             
-            // Preparar array de productos a actualizar
             const productosAActualizar = idsModificados.map(id => ({
                 id: parseInt(id),
                 ...productosEditados[id]
             }));
 
-            // Actualizar progreso
             setProgresoGuardado(prev => ({ ...prev, actual: Math.min(prev.actual + 1, prev.total) }));
             setMensajeTemporal({ 
                 tipo: 'info', 
                 texto: `⏳ Guardando ${idsModificados.length} productos...` 
             });
 
-            // Enviar todos en una sola request
             const response = await axios.put(`${API_URL}/productos/batch`, {
                 productos: productosAActualizar
             });
 
             setProgresoGuardado(prev => ({ ...prev, actual: prev.total }));
 
-            // Recargar productos
             await cargarProductosPorCategoria(categoriaSeleccionada);
             setModoEdicion(false);
             setProductosEditados({});
@@ -360,14 +413,12 @@ function Inventario() {
         } catch (error) {
             console.error('Error al guardar cambios:', error);
             
-            // Intentar guardar uno por uno si falla el batch
             if (idsModificados.length > 10) {
                 setMensajeTemporal({ 
                     tipo: 'warning', 
                     texto: '⚠️ El lote falló, intentando guardar individualmente...' 
                 });
                 
-                // Guardar uno por uno como fallback
                 let exitos = 0;
                 let errores = 0;
                 
@@ -496,6 +547,12 @@ function Inventario() {
         if (modoEliminar && productosSeleccionados.length > 0) {
             info += ` | Seleccionados: ${productosSeleccionados.length} productos`;
         }
+        if (filtrarStockCero) {
+            info += ` | 🔴 Sin stock`;
+        }
+        if (filtrarStockBajo) {
+            info += ` | 🟡 Stock bajo`;
+        }
         return info;
     };
 
@@ -569,7 +626,6 @@ function Inventario() {
                 </div>
             )}
 
-            {/* Barra de progreso para guardado en lote */}
             {progresoGuardado.mostrar && (
                 <div className="inventario-valvic-progress">
                     <div className="progress-bar">
@@ -584,7 +640,6 @@ function Inventario() {
                 </div>
             )}
 
-            {/* Alertas de stock */}
             {(productosStockBajo.length > 0 || productosStockCritico.length > 0) && (
                 <div className="inventario-valvic-alerts-container">
                     {productosStockBajo.length > 0 && (
@@ -811,6 +866,49 @@ function Inventario() {
                                             <FaTrashAlt className="btn-icon" /> Eliminar Productos
                                         </button>
                                     )}
+                                    
+                                    {/* ✅ Filtros de stock - en una sección separada */}
+                                    <div className="filtros-stock">
+                                        <label className="filtro-checkbox">
+                                            <input
+                                                type="checkbox"
+                                                checked={filtrarStockCero}
+                                                onChange={(e) => {
+                                                    setFiltrarStockCero(e.target.checked);
+                                                    if (e.target.checked) {
+                                                        setFiltrarStockBajo(false);
+                                                    }
+                                                }}
+                                            />
+                                            <span className="filtro-color filtro-rojo"></span>
+                                            Sin stock
+                                        </label>
+                                        <label className="filtro-checkbox">
+                                            <input
+                                                type="checkbox"
+                                                checked={filtrarStockBajo}
+                                                onChange={(e) => {
+                                                    setFiltrarStockBajo(e.target.checked);
+                                                    if (e.target.checked) {
+                                                        setFiltrarStockCero(false);
+                                                    }
+                                                }}
+                                            />
+                                            <span className="filtro-color filtro-amarillo"></span>
+                                            Stock bajo
+                                        </label>
+                                        {(filtrarStockCero || filtrarStockBajo) && (
+                                            <button 
+                                                className="filtro-limpiar"
+                                                onClick={() => {
+                                                    setFiltrarStockCero(false);
+                                                    setFiltrarStockBajo(false);
+                                                }}
+                                            >
+                                                <FaTimes className="btn-icon" /> Limpiar filtros
+                                            </button>
+                                        )}
+                                    </div>
                                     {categoriaSeleccionada && categoriaSeleccionada !== 'todas' && (
                                         <div className="columnas-info">
                                             {!columnasVisibles.mostrarCodigo && (
@@ -845,6 +943,7 @@ function Inventario() {
                                             )}
                                         </div>
                                     )}
+                                    
                                 </>
                             ) : modoEdicion ? (
                                 esAdmin && (
@@ -966,7 +1065,9 @@ function Inventario() {
                                     </tr>
                                 ) : (
                                     productosFiltrados.map(producto => {
-                                        const datosProducto = modoEdicion ? productosEditados[producto.id] : producto;
+                                        const datosProducto = modoEdicion && productosEditados[producto.id]
+                                            ? productosEditados[producto.id] 
+                                            : producto;
                                         
                                         return (
                                             <tr 
