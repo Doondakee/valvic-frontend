@@ -238,10 +238,20 @@ function Inventario() {
             const columnas = determinarColumnasVisibles(productosData, esTodas);
             setColumnasVisibles(columnas);
             
-            setModoEdicion(false);
-            setModoEliminar(false);
-            setProductosEditados({});
-            setProductosSeleccionados([]);
+            // ✅ Si estamos en modo edición, actualizar productosEditados con los nuevos productos
+            // pero conservando los cambios que ya se habían hecho
+            if (modoEdicion) {
+                const nuevosEditados = {};
+                productosData.forEach(p => {
+                    // Si el producto ya estaba en productosEditados, mantener sus cambios
+                    // Si no, tomar los datos originales
+                    nuevosEditados[p.id] = productosEditados[p.id] || { ...p };
+                });
+                setProductosEditados(nuevosEditados);
+            } else {
+                setProductosEditados({});
+                setProductosSeleccionados([]);
+            }
         } catch (error) {
             console.error('Error al cargar productos:', error);
         } finally {
@@ -300,17 +310,9 @@ function Inventario() {
         
         setProductosFiltrados(filtrados);
         
-        // ✅ Si estamos en modo edición, actualizar productosEditados solo con los productos filtrados
-        if (modoEdicion) {
-            const nuevosEditados = {};
-            filtrados.forEach(p => {
-                // Si el producto ya estaba en productosEditados, mantener sus cambios
-                // Si no, tomar los datos originales
-                nuevosEditados[p.id] = productosEditados[p.id] || { ...p };
-            });
-            setProductosEditados(nuevosEditados);
-        }
-    }, [busqueda, productos, filtrarStockCero, filtrarStockBajo, modoEdicion]);
+        // ❌ ELIMINADO: Ya no se actualiza productosEditados aquí
+        // El buscador NO debe modificar productosEditados
+    }, [busqueda, productos, filtrarStockCero, filtrarStockBajo]);
 
     const guardarProducto = async (e) => {
         e.preventDefault();
@@ -351,8 +353,10 @@ function Inventario() {
         setModoEliminar(false);
         setProductosSeleccionados([]);
         setModoEdicion(true);
+        
+        // ✅ Guardar TODOS los productos (no solo los filtrados)
         const editados = {};
-        productosFiltrados.forEach(p => {
+        productos.forEach(p => {
             editados[p.id] = { ...p };
         });
         setProductosEditados(editados);
@@ -365,10 +369,30 @@ function Inventario() {
     };
 
     const guardarCambiosEdicion = async () => {
-        const idsModificados = Object.keys(productosEditados);
+        // ✅ Identificar SOLO los productos que fueron modificados
+        const idsModificados = Object.keys(productosEditados).filter(id => {
+            const original = productos.find(p => p.id === parseInt(id));
+            const editado = productosEditados[id];
+            
+            if (!original) return true;
+            
+            // Comparar campo por campo
+            return (
+                original.producto !== editado.producto ||
+                original.categoria !== editado.categoria ||
+                original.contenido !== editado.contenido ||
+                original.precio !== editado.precio ||
+                original.stock !== editado.stock ||
+                original.codigo !== editado.codigo ||
+                original.vehiculo !== editado.vehiculo ||
+                original.detalle !== editado.detalle ||
+                original.precio_contado !== editado.precio_contado ||
+                original.precio_colocado !== editado.precio_colocado
+            );
+        });
         
         if (idsModificados.length === 0) {
-            setMensajeTemporal({ tipo: 'error', texto: 'No hay cambios para guardar' });
+            setMensajeTemporal({ tipo: 'info', texto: 'No hay cambios para guardar' });
             setTimeout(() => setMensajeTemporal(null), 3000);
             return;
         }
@@ -376,7 +400,7 @@ function Inventario() {
         setProgresoGuardado({ mostrar: true, actual: 0, total: idsModificados.length });
         setMensajeTemporal({ 
             tipo: 'info', 
-            texto: `⏳ Preparando ${idsModificados.length} productos para guardar...` 
+            texto: `⏳ Guardando ${idsModificados.length} productos modificados...` 
         });
 
         try {
@@ -390,7 +414,7 @@ function Inventario() {
             setProgresoGuardado(prev => ({ ...prev, actual: Math.min(prev.actual + 1, prev.total) }));
             setMensajeTemporal({ 
                 tipo: 'info', 
-                texto: `⏳ Guardando ${idsModificados.length} productos...` 
+                texto: `⏳ Guardando cambios...` 
             });
 
             const response = await axios.put(`${API_URL}/productos/batch`, {
