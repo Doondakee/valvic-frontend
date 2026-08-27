@@ -70,7 +70,7 @@ function Patentes() {
         try {
             const patenteUpper = nuevaPatente.toUpperCase().trim();
             
-            const response = await axios.post(`${API_URL}/api/patentes`, {
+            const response = await axios.post(`${API_URL}/patentes`, {
                 patente: patenteUpper
             });
 

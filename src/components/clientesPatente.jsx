@@ -103,7 +103,6 @@ function ClientesPatentes() {
                 <div className="clientes-patentes-login">
                     <div className="clientes-patentes-login-header">
                         <img src={logoValvic} alt="Valvic" className="clientes-patentes-logo" />
-                        <h1 className="clientes-patentes-login-title">Valvic</h1>
                         <p className="clientes-patentes-login-subtitle">Consultá la información de tu vehículo</p>
                     </div>
 
@@ -162,7 +161,7 @@ function ClientesPatentes() {
                 <div className="clientes-patentes-resultado-header">
                     <div className="clientes-patentes-resultado-brand">
                         <img src={logoValvic} alt="Valvic" className="clientes-patentes-resultado-logo" />
-                        <h1 className="clientes-patentes-resultado-title">Valvic</h1>
+                        <h1 className="clientes-patentes-resultado-title">VALVIC</h1>
                     </div>
                     <button 
                         className="clientes-patentes-resultado-logout"

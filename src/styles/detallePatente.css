@@ -4,6 +4,7 @@
     background: #0a0a0a;
     color: #ffffff;
     padding: 24px;
+    padding-top: 110px;
 }
 
 /********** HEADER **********/
@@ -13,13 +14,24 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
-    background: #111;
+    background: #202020;
     padding: 16px 24px;
     border-radius: 16px;
     border: 1px solid rgba(255, 215, 0, 0.08);
-    max-width: 85%;
+    
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    
+    width: 83%;
     margin: 0 auto;
-    margin-bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    margin-top: 100px;
 }
 
 .detalle-btn-volver {
@@ -31,6 +43,7 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .detalle-btn-volver:hover {
@@ -45,6 +58,7 @@
     color: #FFD700;
     letter-spacing: 3px;
     font-family: 'Courier New', monospace;
+    flex-shrink: 0;
 }
 
 .detalle-acciones-header {
@@ -63,6 +77,7 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .detalle-btn-modificar:hover {
@@ -80,6 +95,7 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .detalle-btn-eliminar:hover {
@@ -97,6 +113,7 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .detalle-btn-guardar:hover:not(:disabled) {
@@ -114,6 +131,7 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .detalle-btn-cancelar:hover {
@@ -191,6 +209,8 @@
     color: #fff;
     font-size: 14px;
     transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .detalle-input:focus {
@@ -542,11 +562,16 @@
     .detalle-body {
         max-width: 95%;
     }
+
+    .detalle-header {
+        max-width: 95%;
+    }
 }
 
 @media (max-width: 768px) {
     .detalle-container {
         padding: 12px;
+        padding-top: 180px; /* Más espacio para el header fijo en móvil */
     }
 
     .detalle-header {
@@ -554,6 +579,9 @@
         align-items: stretch;
         gap: 12px;
         padding: 16px;
+        max-width: 100%;
+        border-radius: 12px;
+        margin-top: 60px; /* Menos margen en móvil */
     }
 
     .detalle-patente {
@@ -590,7 +618,6 @@
         font-size: 22px;
     }
 
-    /* Móvil: los campos se apilan */
     .servicio-card-campos {
         flex-wrap: wrap !important;
         gap: 8px;
@@ -619,6 +646,13 @@
 @media (max-width: 480px) {
     .detalle-container {
         padding: 8px;
+        padding-top: 200px;
+    }
+
+    .detalle-header {
+        margin-top: 50px;
+        padding: 12px 14px;
+        gap: 10px;
     }
 
     .detalle-patente {
