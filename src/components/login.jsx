@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import logoValvic from '../assets/valvic.png';
 import SolicitarRegistro from './solicitarRegistro';
@@ -12,7 +11,6 @@ function Login({ onLogin }) {
     const [error, setError] = useState('');
     const [cargando, setCargando] = useState(false);
     const [mostrarRegistro, setMostrarRegistro] = useState(false);
-    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,12 +27,7 @@ function Login({ onLogin }) {
                 console.log('Rol recibido:', response.data.usuario.rol); 
                 localStorage.setItem('usuario', response.data.usuario.nombre);
                 localStorage.setItem('rol', response.data.usuario.rol); 
-                localStorage.setItem('userId', response.data.usuario.id);
-                localStorage.setItem('tiempoSesion', Date.now().toString());
-
                 onLogin(true);
-
-                navigate('/inventario');
             }
 
         } catch (error) {
