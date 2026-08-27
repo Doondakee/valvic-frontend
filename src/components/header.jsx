@@ -1,17 +1,23 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import logoValvic from '../assets/valvic.png';
 
 // ICONOS
 import { 
-    FaStore, FaPlus, FaPercent, FaSignOutAlt, FaChevronDown, FaBoxes, FaUsers
+    FaStore, FaPlus, FaPercent, FaSignOutAlt, FaChevronDown, FaBoxes, FaUsers, FaCar, FaExternalLinkAlt
 } from 'react-icons/fa';
 
-function Header({ activeTab, setActiveTab, onLogout, onNavigateToUsuarios }) {
+function Header({ activeTab, onLogout, onNavigateToUsuarios }) {
     const [showMenu, setShowMenu] = useState(false);
+    const navigate = useNavigate();
     const usuario = localStorage.getItem('usuario') || 'Usuario';
     const rol = localStorage.getItem('rol') || 'empleado';
 
     const esAdmin = rol === 'administrador';
+
+    const handleNavigate = (ruta) => {
+        navigate(ruta);
+    };
 
     return (
         <header className="header-valvic">
@@ -21,9 +27,6 @@ function Header({ activeTab, setActiveTab, onLogout, onNavigateToUsuarios }) {
                         <img src={logoValvic} alt="Valvic" className="header-valvic-logo"/>
                         <div className="header-valvic-brand-text">
                             <h1 className="header-valvic-title">Gomería Valvic</h1>
-                            <span className="header-valvic-subtitle">
-                                <FaBoxes className="header-subtitle-icon" /> Control de Inventario
-                            </span>
                         </div>
                     </div>
                 </div>
@@ -31,7 +34,7 @@ function Header({ activeTab, setActiveTab, onLogout, onNavigateToUsuarios }) {
                 <nav className="header-valvic-nav">
                     <button
                         className={`header-valvic-tab ${activeTab === 'inventario' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('inventario')}
+                        onClick={() => handleNavigate('/inventario')}
                     >
                         <FaStore className="tab-icon" />
                         <span className="tab-text">Inventario</span>
@@ -41,7 +44,7 @@ function Header({ activeTab, setActiveTab, onLogout, onNavigateToUsuarios }) {
                         <>
                             <button
                                 className={`header-valvic-tab ${activeTab === 'nuevo' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('nuevo')}
+                                onClick={() => handleNavigate('/nuevo')}
                             >
                                 <FaPlus className="tab-icon" />
                                 <span className="tab-text">+ Nuevo</span>
@@ -49,13 +52,22 @@ function Header({ activeTab, setActiveTab, onLogout, onNavigateToUsuarios }) {
 
                             <button
                                 className={`header-valvic-tab ${activeTab === 'sumador' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('sumador')}
+                                onClick={() => handleNavigate('/sumador')}
                             >
                                 <FaPercent className="tab-icon" />
                                 <span className="tab-text">Sumador %</span>
                             </button>
                         </>
                     )}
+
+                    <button
+                        className={`header-valvic-tab ${activeTab === 'patentes' ? 'active' : ''}`}
+                        onClick={() => handleNavigate('/patentes')}
+                    >
+                        <FaCar className="tab-icon" />
+                        <span className="tab-text">Patente</span>
+                    </button>
+                    
                 </nav>
 
                 <div className="header-valvic-user">
@@ -81,6 +93,19 @@ function Header({ activeTab, setActiveTab, onLogout, onNavigateToUsuarios }) {
                                     <div className="dropdown-user-role">{rol}</div>
                                 </div>
                             </div>
+                            <div className="dropdown-divider"></div>
+                            
+                            {/* ✅ NUEVO: Patente de Clientes (público) */}
+                            <button 
+                                className="dropdown-item" 
+                                onClick={() => { 
+                                    setShowMenu(false); 
+                                    handleNavigate('/clientes-patentes');
+                                }}
+                            >
+                                <FaExternalLinkAlt className="dropdown-icon" />
+                                Patente de Clientes
+                            </button>
                             <div className="dropdown-divider"></div>
                             
                             {esAdmin && (

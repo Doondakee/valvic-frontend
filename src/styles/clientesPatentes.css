@@ -1,0 +1,667 @@
+/********** CLIENTES PATENTES - LOGIN FALSO **********/
+
+.clientes-patentes-container {
+    min-height: 100vh;
+    background: #000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+}
+
+/* ================================================
+   PANTALLA DE LOGIN
+   ================================================ */
+.clientes-patentes-login {
+    max-width: 420px;
+    width: 100%;
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 215, 0, 0.08);
+    border-radius: 16px;
+    padding: 32px 20px;
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+}
+
+.clientes-patentes-login-header {
+    margin-bottom: 28px;
+}
+
+.clientes-patentes-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    margin-bottom: 12px;
+}
+
+.clientes-patentes-login-title {
+    color: #FFD700;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+}
+
+.clientes-patentes-login-subtitle {
+    color: #666;
+    font-size: 13px;
+    margin: 0;
+}
+
+.clientes-patentes-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.clientes-patentes-login-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: left;
+}
+
+.clientes-patentes-login-input-group label {
+    color: #888;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.clientes-patentes-login-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: #000;
+    border: 2px solid #1a1a1a;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.clientes-patentes-login-input:focus {
+    outline: none;
+    border-color: #FFD700;
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.06);
+}
+
+.clientes-patentes-login-input::placeholder {
+    color: #333;
+    font-size: 14px;
+    letter-spacing: 1px;
+    font-weight: 400;
+}
+
+.clientes-patentes-login-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.clientes-patentes-login-btn {
+    padding: 13px 28px;
+    background: linear-gradient(135deg, #FFD700, #e6c200);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 2px;
+}
+
+.clientes-patentes-login-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+}
+
+.clientes-patentes-login-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.clientes-patentes-login-error {
+    background: rgba(255, 0, 0, 0.06);
+    border: 1px solid rgba(255, 0, 0, 0.12);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #ff6b6b;
+    font-size: 13px;
+    text-align: center;
+}
+
+.clientes-patentes-login-footer {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.clientes-patentes-login-footer span {
+    color: #444;
+    font-size: 11px;
+}
+
+/* ================================================
+   PANTALLA DE RESULTADOS (logueado)
+   ================================================ */
+.clientes-patentes-resultado-wrapper {
+    max-width: 700px;
+    width: 100%;
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 215, 0, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    animation: fadeIn 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    max-height: 95vh;
+}
+
+.clientes-patentes-resultado-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    flex-shrink: 0;
+    background: #0a0a0a;
+    gap: 12px;
+}
+
+.clientes-patentes-resultado-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.clientes-patentes-resultado-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.clientes-patentes-resultado-title {
+    color: #FFD700;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.clientes-patentes-resultado-logout {
+    padding: 6px 16px;
+    background: transparent;
+    color: #666;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.clientes-patentes-resultado-logout:hover {
+    color: #fff;
+    border-color: #444;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* CONTENIDO SCROLLABLE */
+.clientes-patentes-resultado-body {
+    padding: 20px 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.clientes-patentes-resultado-patente {
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFD700;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 3px;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ===== DATOS: Fecha, Kilometraje, Aceite ===== */
+.clientes-patentes-resultado-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.clientes-patentes-resultado-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: #000;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.clientes-patentes-resultado-campo label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.clientes-patentes-resultado-campo span {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 500;
+}
+
+/* ===== PROXIMA VISITA ===== */
+.clientes-patentes-proxima-visita {
+    background: linear-gradient(135deg, #1a1a00, #0a0a00);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.proxima-visita-label {
+    color: #888;
+    font-size: 13px;
+}
+
+.proxima-visita-valor {
+    color: #FFD700;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+/* ===== SERVICIOS REALIZADOS (SOLO CHECKS) ===== */
+.clientes-patentes-resultado-servicios {
+    margin-bottom: 18px;
+}
+
+.clientes-patentes-resultado-servicios h3 {
+    color: #FFD700;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    letter-spacing: 0.5px;
+}
+
+.clientes-patentes-resultado-servicios-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+}
+
+.clientes-patentes-resultado-servicio {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #000;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.clientes-patentes-resultado-servicio .servicio-label {
+    color: #888;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.clientes-patentes-resultado-servicio .servicio-check {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.clientes-patentes-resultado-servicio .servicio-check:contains("✅") {
+    color: #4CAF50;
+}
+
+.clientes-patentes-resultado-servicio .servicio-check:contains("❌") {
+    color: #ff4444;
+}
+
+/* ===== OTROS (CON TEXTO Y CHECK) ===== */
+.clientes-patentes-resultado-otros {
+    margin-bottom: 18px;
+}
+
+.clientes-patentes-resultado-otros h3 {
+    color: #FFD700;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    letter-spacing: 0.5px;
+}
+
+.clientes-patentes-resultado-otros-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+}
+
+.clientes-patentes-resultado-otro {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #000;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.clientes-patentes-resultado-otro .otro-label {
+    color: #ddd;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.clientes-patentes-resultado-otro .otro-check {
+    color: #4CAF50;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* ===== FOOTER FIJO CON WHATSAPP E INSTAGRAM ===== */
+.clientes-patentes-resultado-footer-fijo {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+    background: #0a0a0a;
+}
+
+.clientes-patentes-whatsapp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: #25D366;
+    color: #ffffff;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+.clientes-patentes-whatsapp-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+}
+
+.clientes-patentes-whatsapp-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.clientes-patentes-instagram-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: #ffffff;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+.clientes-patentes-instagram-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(225, 48, 108, 0.3);
+}
+
+.clientes-patentes-instagram-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+/* ================================================
+   ANIMACIONES
+   ================================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================================================
+   RESPONSIVE PARA CELULARES (máx 480px)
+   ================================================ */
+@media (max-width: 480px) {
+    .clientes-patentes-container {
+        padding: 12px;
+    }
+
+    /* --- LOGIN --- */
+    .clientes-patentes-login {
+        padding: 24px 16px;
+        border-radius: 14px;
+    }
+
+    .clientes-patentes-logo {
+        width: 56px;
+        height: 56px;
+    }
+
+    .clientes-patentes-login-title {
+        font-size: 20px;
+    }
+
+    .clientes-patentes-login-subtitle {
+        font-size: 12px;
+    }
+
+    .clientes-patentes-login-input {
+        font-size: 16px;
+        padding: 11px 12px;
+        letter-spacing: 2px;
+    }
+
+    .clientes-patentes-login-input::placeholder {
+        font-size: 13px;
+    }
+
+    .clientes-patentes-login-btn {
+        font-size: 14px;
+        padding: 12px 20px;
+    }
+
+    .clientes-patentes-login-error {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .clientes-patentes-login-footer span {
+        font-size: 10px;
+    }
+
+    /* --- RESULTADOS --- */
+    .clientes-patentes-resultado-wrapper {
+        border-radius: 14px;
+        max-height: 98vh;
+    }
+
+    .clientes-patentes-resultado-header {
+        padding: 12px 16px;
+    }
+
+    .clientes-patentes-resultado-brand {
+        gap: 10px;
+    }
+
+    .clientes-patentes-resultado-logo {
+        width: 32px;
+        height: 32px;
+    }
+
+    .clientes-patentes-resultado-title {
+        font-size: 16px;
+    }
+
+    .clientes-patentes-resultado-logout {
+        font-size: 12px;
+        padding: 5px 14px;
+    }
+
+    .clientes-patentes-resultado-body {
+        padding: 16px 12px;
+    }
+
+    .clientes-patentes-resultado-patente {
+        font-size: 20px;
+        letter-spacing: 2px;
+        margin-bottom: 16px;
+        padding-bottom: 14px;
+    }
+
+    /* Grid de datos a 1 columna en móvil */
+    .clientes-patentes-resultado-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .clientes-patentes-resultado-campo {
+        padding: 8px 12px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .clientes-patentes-resultado-campo label {
+        font-size: 10px;
+    }
+
+    .clientes-patentes-resultado-campo span {
+        font-size: 14px;
+        text-align: right;
+    }
+
+    /* Servicios y Otros: a 1 columna en móvil */
+    .clientes-patentes-resultado-servicios-grid,
+    .clientes-patentes-resultado-otros-grid {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .clientes-patentes-resultado-servicio,
+    .clientes-patentes-resultado-otro {
+        padding: 7px 12px;
+    }
+
+    .clientes-patentes-resultado-servicio .servicio-label,
+    .clientes-patentes-resultado-otro .otro-label {
+        font-size: 12px;
+    }
+
+    .clientes-patentes-resultado-servicio .servicio-check,
+    .clientes-patentes-resultado-otro .otro-check {
+        font-size: 14px;
+    }
+
+    /* Próxima visita */
+    .clientes-patentes-proxima-visita {
+        padding: 12px 14px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        margin-bottom: 16px;
+    }
+
+    .proxima-visita-label {
+        font-size: 12px;
+    }
+
+    .proxima-visita-valor {
+        font-size: 17px;
+    }
+
+    /* Footer fijo */
+    .clientes-patentes-resultado-footer-fijo {
+        padding: 12px 16px;
+        gap: 8px;
+    }
+
+    .clientes-patentes-whatsapp-link,
+    .clientes-patentes-instagram-link {
+        font-size: 13px;
+        padding: 9px 16px;
+    }
+
+    .clientes-patentes-whatsapp-icon,
+    .clientes-patentes-instagram-icon {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* Ajustes extra para pantallas muy pequeñas (hasta 360px) */
+@media (max-width: 360px) {
+    .clientes-patentes-login {
+        padding: 20px 12px;
+    }
+
+    .clientes-patentes-login-title {
+        font-size: 18px;
+    }
+
+    .clientes-patentes-login-input {
+        font-size: 14px;
+        padding: 10px 10px;
+        letter-spacing: 1px;
+    }
+
+    .clientes-patentes-resultado-patente {
+        font-size: 18px;
+    }
+
+    .clientes-patentes-resultado-campo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .clientes-patentes-resultado-campo span {
+        text-align: left;
+        font-size: 13px;
+    }
+
+    .clientes-patentes-whatsapp-link,
+    .clientes-patentes-instagram-link {
+        font-size: 12px;
+        padding: 8px 14px;
+    }
+}
