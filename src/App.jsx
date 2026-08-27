@@ -7,7 +7,7 @@ import Inventario from './components/inventario';
 import Usuarios from './components/usuarios';
 import Nuevo from './components/nuevo';
 import Sumador from './components/sumador';
-import Patentes from './components/Patentes';
+import Patentes from './components/patentes';
 import DetallePatente from './components/detallePatente';
 import ClientesPatentes from './components/clientesPatente';
 import './styles/global.css';
